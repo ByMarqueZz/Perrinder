@@ -1,0 +1,1 @@
+2024-01-23T08:21:29.956Z -query:  SELECT * FROM domain - idUser: 1 - username: root

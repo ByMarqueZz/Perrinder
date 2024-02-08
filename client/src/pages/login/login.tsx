@@ -18,7 +18,7 @@ function Login(props: any) {
     useEffect(() => {
         const interval = setInterval(() => {
             setCurrentImageIndex((prevIndex) => (prevIndex + 1) % Object.keys(images).length);
-        }, 4000);
+        }, 3500);
 
         return () => clearInterval(interval);
     }, [images]);
