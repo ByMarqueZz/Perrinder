@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
-import styles from './login_style';
+import styles from './home_login_style';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-function Login(props: any) {
+function Home_login(props: any) {
     const images = {
         0: require('../../../assets/background_login/1.jpg'),
         1: require('../../../assets/background_login/7.jpg'),
@@ -30,19 +30,23 @@ function Login(props: any) {
         }, 200)
     };
 
+    const onPressLogin = () => {
+        props.navigation.navigate('login')
+    }
+
     return (
         <View style={styles.container}>
             <Image source={images[currentImageIndex]} style={styles.backgroundImage} />
-            <View style={styles.title}>
-                <Image source={require('../../../assets/dogFoot.gif')} style={styles.imageDogFoot} />
-                <View>
-                <Text style={styles.title_text}>Perrinder</Text>
-                <Text style={styles.legendText}>La media naranja de tu mascota</Text>
+            <View style={styles.header}>
+                <View style={styles.title}>
+                    <Image source={require('../../../assets/dogFoot.gif')} style={styles.imageDogFoot} />
+                    <Text style={styles.title_text}>Perrinder</Text>
                 </View>
+                <Text style={styles.legendText}>La media de naranja de tu mascota</Text>
             </View>
             {/* Contenedor del botón de inicio de sesión */}
             <View style={styles.container_button_view2}>
-                <TouchableOpacity onPress={onPressRegister} style={styles.container_button2}>
+                <TouchableOpacity onPress={onPressLogin} style={styles.container_button2}>
                     <Text style={styles.text_button}>Inicia Sesión</Text>
                 </TouchableOpacity>
             </View>
@@ -55,4 +59,4 @@ function Login(props: any) {
     );
 }
 
-export default Login;
+export default Home_login;

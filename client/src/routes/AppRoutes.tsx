@@ -2,13 +2,14 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React, { useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Login from '../pages/login/login';
 import Home from '../pages/home/home';
 import Chat from '../pages/chat/chat';
+import Login from '../pages/login/components/login';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Profile from '../pages/profile/profile';
 import Match from '../pages/match/match';
+import Home_login from '../pages/login/home_login';
 const Tab = createBottomTabNavigator<any>();
 const Slack = createStackNavigator<any>();
 
@@ -39,9 +40,10 @@ export default function AppNavigation() {
                         height: 0,
                     },
                 }}>
-                    <Slack.Screen name="login" options={{
-
-                    }}>
+                    <Slack.Screen name="home_login">
+                        {(props) => <Home_login {...props} loadUserFromStorage={loadUserFromStorage} />}
+                    </Slack.Screen>
+                    <Slack.Screen name="login">
                         {(props) => <Login {...props} loadUserFromStorage={loadUserFromStorage} />}
                     </Slack.Screen>
                 </Slack.Navigator>
@@ -50,6 +52,7 @@ export default function AppNavigation() {
     }
 
     return (
+        // Routing ya logueado
         <NavigationContainer>
             <Tab.Navigator screenOptions={({ route }) => ({
                 headerTitle: () => <></>,

@@ -9,10 +9,15 @@ export default StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    title: {
+    header: {
+        flex: 1,
         position: 'absolute',
         top: 120,
         display: 'flex',
+        alignItems: 'center',
+    },
+    title: {
+        
         flexDirection: 'row',
         alignItems: 'center'
     },
@@ -25,7 +30,7 @@ export default StyleSheet.create({
         textShadowRadius: 2
     },
     legendText: {
-        fontSize: 15,
+        fontSize: 18,
         color: 'white',
         textShadowColor: 'black',
         textShadowOffset: { width: 1.5, height: 1.5 },
@@ -64,13 +69,14 @@ export default StyleSheet.create({
     container_button_view2: {
         flex: 1,
         position: 'absolute',
-        bottom: 90,
+        bottom: 100,
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
     },
     text_button: {
+        fontSize: 20,
         fontWeight: 'bold',
         textAlign: 'center',
         color: 'white'
