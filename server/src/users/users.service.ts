@@ -14,7 +14,7 @@ export class UsersService {
   async createUser(user: CreateUserDto) {
     // se comprueba si el usuario existe
     const userExist = await this.userRepositry.findOne({
-      where: { email: user.username },
+      where: { email: user.email },
     });
     if (userExist) {
       throw new HttpException('User already exists', HttpStatus.FOUND);
