@@ -6,51 +6,56 @@ import { Auth } from './entities/auth.entity';
 import { Repository } from 'typeorm';
 import { hash, compare } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
   constructor(@InjectRepository(Auth) private authRepository: Repository<Auth>,
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    @InjectRepository(User) private userRepository: Repository<User>
   ) { }
 
-  /**
-   * Falta que al crear un auth sea del usuario, para que no cualquiera pueda crear un auth
-   * Vincular que cuando se creé un usuario, se cree un auth
-   * @param createAuthDto 
-   * @returns 
-   */
   async create(createAuthDto: CreateAuthDto) {
-    const { username, password } = createAuthDto;
+    const { email, password } = createAuthDto;
+    const userExist = await this.userRepository.findOne({
+      where: { email, password },
+    });
+    if (!userExist) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
     const plainToHash = await hash(password, 10);
 
     const newUser = this.authRepository.create({
-      username,
+      email,
       password: plainToHash,
     });
 
-    return this.authRepository.save(newUser);
+    this.authRepository.save(newUser);
   }
 
   async login(createAuthDto: CreateAuthDto) {
-    const { username, password } = createAuthDto;
-    const userFound = await this.authRepository.findOne({
-      where: { username },
+    const { email, password } = createAuthDto;
+    let userFound = await this.authRepository.findOne({
+      where: { email },
     });
 
     if (!userFound) {
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      await this.create(createAuthDto);
+      userFound = await this.authRepository.findOne({
+        where: { email },
+      });
     }
-      const checkPassword = await compare(password, userFound.password);
-      if (!checkPassword) {
-        throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
-      }
-      const payload = { id: userFound.id };
-      const token = this.jwtService.sign(payload);
-      const data = {
-        user: userFound,
-        token: token,
-      }
-      return data;
+    const checkPassword = await compare(password, userFound.password);
+    if (!checkPassword) {
+      throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
+    }
+    const payload = { id: userFound.id };
+    const token = this.jwtService.sign(payload);
+    const data = {
+      user: userFound,
+      token: token,
+    }
+    return data;
   }
 
   findAll() {

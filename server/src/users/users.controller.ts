@@ -1,17 +1,6 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Post,
-  Param,
-  ParseIntPipe,
-  Patch,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Param, ParseIntPipe, Patch, UseGuards, } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
@@ -20,34 +9,30 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 @UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
-  constructor(private usersService: UsersService) { }
+  constructor(private readonly userService: UsersService) {}
 
-  @Get('')
-  getUsers(): Promise<User[]> {
-    return this.usersService.getAllUsers();
+  @Post()
+  create(@Body() createPetDto: CreateUserDto) {
+    return this.userService.createUser(createPetDto);
+  }
+
+  @Get()
+  findAll() {
+    return this.userService.getAllUsers();
   }
 
   @Get(':id')
-  getUserById(@Param('id', ParseIntPipe) id: number): Promise<User> {
-    return this.usersService.getUserById(id);
-  }
-
-  @Post()
-  createUser(@Body() newUser: CreateUserDto) {
-    return this.usersService.createUser(newUser);
+  findOne(@Param('id') id: string) {
+    return this.userService.getUserById(+id);
   }
 
   @Patch(':id')
-  updateUser(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() user: UpdateUserDto,
-  ) {
-    return this.usersService.updateUser(id, user);
+  update(@Param('id') id: string, @Body() updatePetDto: UpdateUserDto) {
+    return this.userService.updateUser(+id, updatePetDto);
   }
 
   @Delete(':id')
-  deleteUser(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.deleteUser(id);
+  remove(@Param('id') id: string) {
+    return this.userService.deleteUser(+id);
   }
-
 }
