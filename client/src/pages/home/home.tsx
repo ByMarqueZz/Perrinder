@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, View, Image, Text, Animated, PanResponder, Dimensions, Touchable, TouchableWithoutFeedback } from 'react-native';
+import { View, Image, Text, Animated, PanResponder, Dimensions, TouchableWithoutFeedback } from 'react-native';
+import styles from './home_styles';
 
 const Pets = [
     { id: "1", name: "Luna", image: 'https://static.fundacion-affinity.org/cdn/farfuture/PVbbIC-0M9y4fPbbCsdvAD8bcjjtbFc0NSP3lRwlWcE/mtime:1643275542/sites/default/files/los-10-sonidos-principales-del-perro.jpg' },
@@ -17,19 +18,29 @@ export default function Home(props: any) {
 
     const panResponder = useRef(
         PanResponder.create({
-            onStartShouldSetPanResponder: () => true,
+            onStartShouldSetPanResponder: (event, gesture) => {
+                this.startTime = Date.now(); // Registra el tiempo de inicio
+                this.startX = gesture.x0; // Registra la posición x de inicio
+                return true;
+            },
             onPanResponderMove: (event, gesture) => {
                 position.setValue({ x: gesture.dx, y: gesture.dy });
             },
             onPanResponderRelease: (event, gesture) => {
+                this.endTime = Date.now(); // Registra el tiempo de finalización
+                this.endX = gesture.x0; // Registra la posición x de finalización
+
+                const duration = this.endTime - this.startTime; // Calcula la duración
+
+                // Swipes
                 if (gesture.dx > 120) {
-                    // Swipe right
-                    Animated.spring(position, {
-                        toValue: { x: SCREEN_WIDTH + 100, y: gesture.dy },
-                        useNativeDriver: false,
-                    }).start(() => {
-                        nextCard();
-                    });
+                        // Swipe right
+                        Animated.spring(position, {
+                            toValue: { x: SCREEN_WIDTH + 100, y: gesture.dy },
+                            useNativeDriver: false,
+                        }).start(() => {
+                            nextCard();
+                        });
                 } else if (gesture.dx < -120) {
                     // Swipe left
                     Animated.spring(position, {
@@ -39,18 +50,24 @@ export default function Home(props: any) {
                         nextCard();
                     });
                 } else {
-                    // Return to original position
+                    // Return to initial position
                     Animated.spring(position, {
                         toValue: { x: 0, y: 0 },
                         useNativeDriver: false,
-                    }).start(
-                        () => setImage('https://hips.hearstapps.com/hmg-prod/images/gettyimages-695480884-64f8446a4e85d.jpg')
-                    );
-                    
+                    }).start();
+                }
+                // Clicks
+                if(this.endX > 280 && duration < 200) {
+                    //Tap right
+                    setImage("https://t2.gstatic.com/licensed-image?q=tbn:ANd9GcQOO0X7mMnoYz-e9Zdc6Pe6Wz7Ow1DcvhEiaex5aSv6QJDoCtcooqA7UUbjrphvjlIc");
+                } else if(this.endX < 120 && duration < 200) {
+                    //Tap left
+                    setImage(pets[0].image);
                 }
             },
         })
     ).current;
+
 
     const rotateCard = position.x.interpolate({
         inputRange: [-SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2],
@@ -83,7 +100,7 @@ export default function Home(props: any) {
     return (
         <View style={styles.container}>
             {pets.map((pet, index) => {
-                if (index === 0) {
+                if (index == 0) {
                     return (
                         <Animated.View
                             {...panResponder.panHandlers}
@@ -91,50 +108,27 @@ export default function Home(props: any) {
                             style={[position.getLayout(), styles.card, { transform: [{ rotate: rotateCard }] }]}
                         >
                             {
-                                image ? <Image style={styles.image} source={{ uri: image }} /> : <Image style={styles.image} source={{ uri: pets[index].image }} />
+                                image ?
+                                    <Image style={styles.image} source={{ uri: image }} /> :
+                                    <Image style={styles.image} source={{ uri: pets[index].image }} />
                             }
-                                <Text style={styles.name}>{pet.name}</Text>
+                            <Text style={styles.name}>{pet.name}</Text>
                         </Animated.View>
+                    );
 
+                }
+                if (index == 1) {
+                    return (
+                        <Animated.View
+                            key={pet.id}
+                            style={[styles.cardAbsolute]}
+                        >
+                            <Image style={styles.image} source={{ uri: pets[index].image }} />
+                            <Text style={styles.name}>{pet.name}</Text>
+                        </Animated.View>
                     );
                 }
             })}
         </View>
     );
 }
-
-
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    card: {
-        borderRadius: 10,
-        borderWidth: 2,
-        borderColor: '#E8E8E8',
-        justifyContent: 'center',
-        backgroundColor: 'white',
-        width: '90%',
-        height: '80%',
-        overflow: 'hidden',
-    },
-    image: {
-        width: '100%',
-        height: '100%',
-        resizeMode: 'cover',
-    },
-    name: {
-        position: 'absolute',
-        bottom: 20,
-        left: 20,
-        fontSize: 32,
-        fontWeight: 'bold',
-        color: 'white',
-        textShadowColor: 'black',
-        textShadowOffset: { width: 2, height: 2 },
-        textShadowRadius: 2,
-    },
-});

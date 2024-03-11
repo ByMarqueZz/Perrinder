@@ -17,7 +17,7 @@ export class PetsService {
   }
 
   findAll() {
-    return this.petRepository.find({});
+    return this.petRepository.find({relations: ['photos'] });
   }
 
   findOne(id: number) {
@@ -25,7 +25,7 @@ export class PetsService {
     if (!exists) {
       throw new HttpException('Pet not found', HttpStatus.NOT_FOUND);
     }
-    return this.petRepository.findOne({ where: { id } });
+    return this.petRepository.findOne({ where: { id }, relations: ['photos'] });
   }
 
   update(id: number, updatePetDto: UpdatePetDto) {

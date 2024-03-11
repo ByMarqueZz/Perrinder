@@ -6,6 +6,7 @@ import {
     JoinColumn,
     OneToMany,
 } from 'typeorm';
+import { Pet } from '../../pets/entities/pet.entity';
 
 @Entity({ name: 'users' })
 export class User {
@@ -26,6 +27,9 @@ export class User {
 
     @Column()
     password: string;
+
+    @OneToMany(() => Pet, (pet) => pet.user)
+    pets: Pet[];
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdAt: Date;

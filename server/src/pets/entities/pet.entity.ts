@@ -1,4 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'typeorm';
+import { User } from '../../users/entities/user.entity';
+import { Photo } from '../../photos/entities/photo.entity';
 
 // - Nombre del perro
 // - Sexo del perro
@@ -38,6 +40,12 @@ export class Pet {
 
     @Column()
     description: string;
+
+    @ManyToOne(() => User, user => user.pets)
+    user: User;
+
+    @OneToMany(() => Photo, photo => photo.pet)
+    photos: Photo[];
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdAt: Date;

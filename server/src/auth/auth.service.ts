@@ -51,8 +51,14 @@ export class AuthService {
     }
     const payload = { id: userFound.id };
     const token = this.jwtService.sign(payload);
+    const user = await this.userRepository.findOne({
+      where: { email },
+    });
+    if(!user){
+      throw new HttpException('Internal Error', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
     const data = {
-      user: userFound,
+      user: user,
       token: token,
     }
     return data;
