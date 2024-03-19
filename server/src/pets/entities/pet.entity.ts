@@ -27,9 +27,6 @@ export class Pet {
     breed: string;
 
     @Column()
-    color: string;
-
-    @Column()
     weight: string;
 
     @Column()

@@ -9,4 +9,11 @@ export default StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
+    input: {
+        borderWidth: 1,
+        borderColor: 'black',
+        width: '75%',
+        padding: 15,
+        borderRadius: 20,
+    },
 });
