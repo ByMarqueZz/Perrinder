@@ -21,7 +21,8 @@ export default function Login(props: any) {
         }).then((res) => {
             if (res.status === 201) {
                 res.json().then((data) => {
-                    AsyncStorage.setItem('user', JSON.stringify({ id: 1, username: 'paco', password: 'pepe' }));
+                    AsyncStorage.setItem('token', data.token);
+                    AsyncStorage.setItem('user', JSON.stringify(data.user));
                     props.loadUserFromStorage();
                 })
             } else {

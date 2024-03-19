@@ -46,6 +46,9 @@ export default function AppNavigation() {
                     <Slack.Screen name="login">
                         {(props) => <Login {...props} loadUserFromStorage={loadUserFromStorage} />}
                     </Slack.Screen>
+                    <Slack.Screen name="resgiter">
+                        {(props) => <Login {...props} loadUserFromStorage={loadUserFromStorage} />}
+                    </Slack.Screen>
                 </Slack.Navigator>
             </NavigationContainer>
         )
