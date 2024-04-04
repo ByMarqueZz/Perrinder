@@ -10,6 +10,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import Profile from '../pages/profile/profile';
 import Match from '../pages/match/match';
 import Home_login from '../pages/login/home_login';
+import CreatePet from '../pages/profile/componentes/createPet/createPet';
 const Tab = createBottomTabNavigator<any>();
 const Slack = createStackNavigator<any>();
 

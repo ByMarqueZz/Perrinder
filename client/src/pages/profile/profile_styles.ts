@@ -10,10 +10,13 @@ export default StyleSheet.create({
         justifyContent: 'center',
     },
     input: {
-        borderWidth: 1,
-        borderColor: 'black',
         width: '75%',
         padding: 15,
         borderRadius: 20,
+    },
+    image: {
+        width: 150,
+        height: 150,
+        borderRadius: 75,
     },
 });
