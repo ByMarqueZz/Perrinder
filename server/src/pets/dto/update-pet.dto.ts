@@ -10,4 +10,5 @@ export class UpdatePetDto extends PartialType(CreatePetDto) {
     age: string
     location: string
     description: string
+    photos?: string[]
 }

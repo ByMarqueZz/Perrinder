@@ -6,4 +6,5 @@ export class CreatePetDto {
     age: string
     location: string
     description: string
+    photos?: string[]
 }

@@ -11,7 +11,6 @@ export class PhotosService {
   
   create(createPhotoDto: CreatePhotoDto) {
     const newPhoto = this.photoRepository.create(createPhotoDto);
-    console.log(createPhotoDto)
     return this.photoRepository.save(newPhoto);
   }
 

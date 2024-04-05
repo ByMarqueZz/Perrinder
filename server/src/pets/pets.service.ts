@@ -4,16 +4,34 @@ import { UpdatePetDto } from './dto/update-pet.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Pet } from './entities/pet.entity';
 import { Repository } from 'typeorm';
+import { Photo } from 'src/photos/entities/photo.entity';
+import savePhotos from './services/savePhotos';
 
 @Injectable()
 export class PetsService {
   constructor(
     @InjectRepository(Pet) private petRepository: Repository<Pet>,
+    @InjectRepository(Photo) private photoRepository: Repository<Photo>
   ) {}
 
   create(createPetDto: CreatePetDto) {
-    const newPet = this.petRepository.create(createPetDto);
-    return this.petRepository.save(newPet);
+    // separamos las fotos del resto de los datos
+    const {photos, ...rest} = createPetDto;
+    console.log({photos, rest})
+    // creamos el pet con los datos restantes
+    const newPet = this.petRepository.create(rest);
+    this.petRepository.save(newPet);
+    console.log('Mascota creada correctamente')
+    // si hay fotos, las guardamos
+    if (photos) {
+      photos.forEach(async (photo) => {
+        const path = await savePhotos(photo, newPet);
+        console.log({path})
+        const newPhoto = this.photoRepository.create({path: path, pet: newPet});
+        await this.photoRepository.save(newPhoto);
+      });
+    }
+    return newPet;
   }
 
   findAll() {
@@ -33,7 +51,8 @@ export class PetsService {
     if (!exists) {
       throw new HttpException('Pet not found', HttpStatus.NOT_FOUND);
     }
-    const updatedPet = Object.assign(exists, updatePetDto);
+    const {photos, ...rest} = updatePetDto;
+    const updatedPet = Object.assign(exists, rest);
     return this.petRepository.update(id, updatedPet);
   }
 
