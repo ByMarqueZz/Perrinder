@@ -11,9 +11,9 @@ Estoy implementando con React Native que es un framework parecido a Flutter que 
 Estoy implementando NestJs que es un framework de Node y sirve para crear una API REST con documentación y seguridad con AuthJWT Tokens
 
 ## Usage/Images
-<a src="https://ibb.co/1mYX8mc" target="_blank">Foto backend funcionando y estructura de carpetas</a>
-<a src="https://ibb.co/sbzC38k" target="_blank">Foto app login</a>
-<a src="https://ibb.co/Dp4FcTC" target="_blank">Foto app home</a>
+- [Foto backend funcionando y estructura de carpetas](https://ibb.co/1mYX8mc)
+- [Foto app login](https://ibb.co/sbzC38k)
+- [Foto app home](https://ibb.co/Dp4FcTC)
 
 ## Authors
 
