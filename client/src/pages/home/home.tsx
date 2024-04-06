@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Image, Text, Animated, PanResponder, Dimensions, TouchableWithoutFeedback } from 'react-native';
 import styles from './home_styles';
+import store from '../../redux/store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { decode } from 'base-64';
 
 const Pets = [
     { id: "1", name: "Luna", image: 'https://static.fundacion-affinity.org/cdn/farfuture/PVbbIC-0M9y4fPbbCsdvAD8bcjjtbFc0NSP3lRwlWcE/mtime:1643275542/sites/default/files/los-10-sonidos-principales-del-perro.jpg' },
@@ -34,13 +37,13 @@ export default function Home(props: any) {
 
                 // Swipes
                 if (gesture.dx > 120) {
-                        // Swipe right
-                        Animated.spring(position, {
-                            toValue: { x: SCREEN_WIDTH + 100, y: gesture.dy },
-                            useNativeDriver: false,
-                        }).start(() => {
-                            nextCard();
-                        });
+                    // Swipe right
+                    Animated.spring(position, {
+                        toValue: { x: SCREEN_WIDTH + 100, y: gesture.dy },
+                        useNativeDriver: false,
+                    }).start(() => {
+                        nextCard();
+                    });
                 } else if (gesture.dx < -120) {
                     // Swipe left
                     Animated.spring(position, {
@@ -57,10 +60,10 @@ export default function Home(props: any) {
                     }).start();
                 }
                 // Clicks
-                if(this.endX > 280 && duration < 200) {
+                if (this.endX > 280 && duration < 200) {
                     //Tap right
                     setImage("https://t2.gstatic.com/licensed-image?q=tbn:ANd9GcQOO0X7mMnoYz-e9Zdc6Pe6Wz7Ow1DcvhEiaex5aSv6QJDoCtcooqA7UUbjrphvjlIc");
-                } else if(this.endX < 120 && duration < 200) {
+                } else if (this.endX < 120 && duration < 200) {
                     //Tap left
                     setImage(pets[0].image);
                 }
@@ -84,12 +87,63 @@ export default function Home(props: any) {
         position.setValue({ x: 0, y: 0 });
     }, [pets]);
 
+    useEffect(() => {
+        getPets();
+    }, []);
+
+    async function getPets() {
+        const token = await AsyncStorage.getItem('token')
+        fetch(store.getState().url + '/pets', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            }
+        })
+            .then(response => response.json())
+            .then(async data => {
+                const petsWithBlobs = await Promise.all(data.map(async (pet: any) => {
+                    const photosWithBlobs = await Promise.all(pet.photos.map(async (photo: any) => {
+                        // const blob = base64toBlob(photo.file.data.data, photo.file.type);
+                        return { ...photo };
+                    }));
+
+                    return { ...pet, photos: photosWithBlobs };
+                }));
+
+                // Ahora petsWithBlobs contiene todas las fotos en formato blob
+                console.log(petsWithBlobs);
+            })
+
+    }
+
+    function base64toBlob(base64Data:any, contentType:any) {
+        const byteCharacters = decode(base64Data);
+        const byteArrays = [];
+        const sliceSize = 1024;
+    
+        for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+            const slice = byteCharacters.slice(offset, offset + sliceSize);
+        
+            const byteNumbers = new Array(slice.length);
+            for (let i = 0; i < slice.length; i++) {
+                byteNumbers[i] = slice.charCodeAt(i);
+            }
+        
+            const byteArray = new Uint8Array(byteNumbers);
+            byteArrays.push(byteArray);
+        }
+    
+        return new Blob(byteArrays, { type: contentType });
+    }
+
+
     if (pets.length === 0) {
         return (
             <View style={styles.container}>
                 <Text>No hay más mascotas</Text>
                 <Text onPress={() => {
-                    setPets(Pets);
+                    getPets();
                 }} style={{
                     color: 'red'
                 }}>Reload</Text>
