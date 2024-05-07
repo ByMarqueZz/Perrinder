@@ -4,7 +4,7 @@ import { createSlice } from "@reduxjs/toolkit";
 // const initial_state = 'http://192.168.9.84:5000' //wifi clase
 // const initial_state = 'http://192.168.208.127:5000'// cable 
 // const initial_state = 'http://192.168.8.148:5000'
-const initial_state = 'http://192.168.1.134:8000'
+const initial_state = 'http://192.168.1.140:8000'
 
 export const urlSlice = createSlice({
     name: 'url',

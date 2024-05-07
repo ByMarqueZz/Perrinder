@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Photo } from '../../photos/entities/photo.entity';
 
@@ -12,41 +18,45 @@ import { Photo } from '../../photos/entities/photo.entity';
 // - Fotos (máximo las que deje Tinder)
 // + Gustos, aficiones, planes
 
-@Entity({ name: 'pets'})
+@Entity({ name: 'pets' })
 export class Pet {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column()
-    name: string;
+  @Column()
+  name: string;
 
-    @Column()
-    gender: string;
+  @Column()
+  gender: string;
 
-    @Column()
-    breed: string;
+  @Column()
+  breed: string;
 
-    @Column()
-    weight: string;
+  @Column()
+  weight: string;
 
-    @Column()
-    age: string;
+  @Column()
+  age: string;
 
-    @Column()
-    location: string;
+  @Column()
+  location: string;
 
-    @Column()
-    description: string;
+  @Column()
+  description: string;
 
-    @ManyToOne(() => User, user => user.pets)
-    user: User;
+  @ManyToOne(() => User, (user) => user.pets)
+  user: User;
 
-    @OneToMany(() => Photo, photo => photo.pet)
-    photos: Photo[];
+  @OneToMany(() => Photo, (photo) => photo.pet)
+  photos: Photo[];
 
-    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-    createdAt: Date;
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
 
-    @Column({ nullable: true, type: 'timestamp', default: () => 'CURRENT_TIMESTAMP'})
-    updatedAt: Date;
+  @Column({
+    nullable: true,
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  updatedAt: Date;
 }

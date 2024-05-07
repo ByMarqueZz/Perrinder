@@ -24,10 +24,7 @@ function Home_login(props: any) {
     }, [images]);
 
     const onPressRegister = () => {
-        setTimeout(() => {
-            AsyncStorage.setItem('user', JSON.stringify({ id: 1, username: 'paco', password: 'pepe' }));
-            props.loadUserFromStorage();
-        }, 200)
+        props.navigation.navigate('register')
     };
 
     const onPressLogin = () => {

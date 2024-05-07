@@ -1,6 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Auth } from './entities/auth.entity';
 import { Repository } from 'typeorm';
@@ -10,10 +9,11 @@ import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
-  constructor(@InjectRepository(Auth) private authRepository: Repository<Auth>,
+  constructor(
+    @InjectRepository(Auth) private authRepository: Repository<Auth>,
     private jwtService: JwtService,
-    @InjectRepository(User) private userRepository: Repository<User>
-  ) { }
+    @InjectRepository(User) private userRepository: Repository<User>,
+  ) {}
 
   async create(createAuthDto: CreateAuthDto) {
     const { email, password } = createAuthDto;
@@ -54,13 +54,16 @@ export class AuthService {
     const user = await this.userRepository.findOne({
       where: { email },
     });
-    if(!user){
-      throw new HttpException('Internal Error', HttpStatus.INTERNAL_SERVER_ERROR);
+    if (!user) {
+      throw new HttpException(
+        'Internal Error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
     const data = {
       user: user,
       token: token,
-    }
+    };
     return data;
   }
 }

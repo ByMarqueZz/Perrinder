@@ -29,7 +29,7 @@ export class UsersService {
   }
 
   async getUserById(id: number) {
-    const userFound = await this.userRepositry.findOne({ where: { id: id }});
+    const userFound = await this.userRepositry.findOne({ where: { id: id } });
     if (!userFound) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }

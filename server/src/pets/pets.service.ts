@@ -12,7 +12,7 @@ import * as path from 'path';
 export class PetsService {
   constructor(
     @InjectRepository(Pet) private petRepository: Repository<Pet>,
-    @InjectRepository(Photo) private photoRepository: Repository<Photo>
+    @InjectRepository(Photo) private photoRepository: Repository<Photo>,
   ) { }
 
   async create(createPetDto: CreatePetDto) {
@@ -25,17 +25,17 @@ export class PetsService {
     if (photos) {
       photos.forEach(async (photoUrl) => {
         const savedPhotoPath = await this.savePhotos(photoUrl, newPet.id);
-        const newPhoto = this.photoRepository.create({ path: savedPhotoPath, pet: newPet });
+        const newPhoto = this.photoRepository.create({
+          path: savedPhotoPath,
+          pet: newPet,
+        });
         await this.photoRepository.save(newPhoto);
       });
     }
     return newPet;
   }
 
-  async savePhotos(photoUrl: string, id: number) {
-    const photoFileName = path.basename(photoUrl);
-    const photoPath = path.join(__dirname, '..', '..', 'uploads', id + "-" + photoFileName);
-
+  async savePhotos(photoUrl: string, id: number): Promise<string> {
     // Eliminar el prefijo "file://" de la URL
     const filePath = photoUrl.replace('file://', '');
 
@@ -43,10 +43,16 @@ export class PetsService {
       // Leer el archivo desde la ruta local
       const photoData = fs.readFileSync(filePath);
 
-      // Guardar el archivo en el servidor
-      fs.writeFileSync(photoPath, photoData);
-
-      return id + "-" + photoFileName;
+      const res = await fetch('https://api.imgbb.com/1/upload', {
+        method: 'POST',
+        body: JSON.stringify({
+          key: 'f0a62074f96665b245a56bbd67a78c6e',
+          image: photoData.toString('base64'),
+        }),
+      })
+      const data = await res.json();
+      console.log(data)
+      return data.data.url;
     } catch (error) {
       console.error('Error al guardar la foto:', error);
       throw error;
@@ -54,16 +60,22 @@ export class PetsService {
   }
 
   async findAll() {
-    const petsWithPhotos = await this.petRepository.find({ relations: ['photos'] });
+    const petsWithPhotos = await this.petRepository.find({
+      relations: ['photos'],
+    });
 
-    const petsWithFiles = await Promise.all(petsWithPhotos.map(async pet => {
-      const photosWithFiles = await Promise.all(pet.photos.map(async photo => {
-        const file = await this.readFile(photo.path);
-        return { ...photo, file };
-      }));
+    const petsWithFiles = await Promise.all(
+      petsWithPhotos.map(async (pet) => {
+        const photosWithFiles = await Promise.all(
+          pet.photos.map(async (photo) => {
+            const file = await this.readFile(photo.path);
+            return { ...photo, file };
+          }),
+        );
 
-      return { ...pet, photos: photosWithFiles };
-    }));
+        return { ...pet, photos: photosWithFiles };
+      }),
+    );
 
     return petsWithFiles;
   }
@@ -90,6 +102,7 @@ export class PetsService {
     if (!exists) {
       throw new HttpException('Pet not found', HttpStatus.NOT_FOUND);
     }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { photos, ...rest } = updatePetDto;
     const updatedPet = Object.assign(exists, rest);
     return this.petRepository.update(id, updatedPet);

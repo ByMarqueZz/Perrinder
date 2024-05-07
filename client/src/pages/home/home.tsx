@@ -3,7 +3,6 @@ import { View, Image, Text, Animated, PanResponder, Dimensions, TouchableWithout
 import styles from './home_styles';
 import store from '../../redux/store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { decode } from 'base-64';
 
 const Pets = [
     { id: "1", name: "Luna", image: 'https://static.fundacion-affinity.org/cdn/farfuture/PVbbIC-0M9y4fPbbCsdvAD8bcjjtbFc0NSP3lRwlWcE/mtime:1643275542/sites/default/files/los-10-sonidos-principales-del-perro.jpg' },
@@ -14,7 +13,7 @@ const Pets = [
 ];
 
 export default function Home(props: any) {
-    const [pets, setPets] = useState(Pets);
+    const [pets, setPets] = useState<any>(Pets);
     const position = useRef(new Animated.ValueXY()).current;
     const SCREEN_WIDTH = Dimensions.get('window').width;
     const [image, setImage] = useState<false | string>(false);
@@ -100,41 +99,28 @@ export default function Home(props: any) {
                 'Authorization': 'Bearer ' + token
             }
         })
-            .then(response => response.json())
-            .then(async data => {
-                const petsWithBlobs = await Promise.all(data.map(async (pet: any) => {
-                    const photosWithBlobs = await Promise.all(pet.photos.map(async (photo: any) => {
-                        // const blob = base64toBlob(photo.file.data.data, photo.file.type);
-                        return { ...photo };
-                    }));
-
-                    return { ...pet, photos: photosWithBlobs };
-                }));
-
-                // Ahora petsWithBlobs contiene todas las fotos en formato blob
-                console.log(petsWithBlobs);
+            .then(response => {
+                return response.json();
             })
+            .then(async data => {
+                console.log(data);
+                const petsWithBlobs = await Promise.all(data.map(async (pet: any) => {
+                    const photosPromises = pet.photos.map(async (photo: any) => {
+                        const blob = bufferToBlob(photo.file.data.data, photo.file.type);
+                        return { ...photo, blob };
+                    });
+                    const photos = await Promise.all(photosPromises);
+                    return { ...pet, photos };
+                }));
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
 
     }
 
-    function base64toBlob(base64Data:any, contentType:any) {
-        const byteCharacters = decode(base64Data);
-        const byteArrays = [];
-        const sliceSize = 1024;
-    
-        for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-            const slice = byteCharacters.slice(offset, offset + sliceSize);
-        
-            const byteNumbers = new Array(slice.length);
-            for (let i = 0; i < slice.length; i++) {
-                byteNumbers[i] = slice.charCodeAt(i);
-            }
-        
-            const byteArray = new Uint8Array(byteNumbers);
-            byteArrays.push(byteArray);
-        }
-    
-        return new Blob(byteArrays, { type: contentType });
+    function bufferToBlob(buffer: any, type: string) {
+        return new Blob([buffer], { type: type });
     }
 
 

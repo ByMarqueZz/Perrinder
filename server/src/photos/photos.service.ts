@@ -7,8 +7,10 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class PhotosService {
-  constructor(@InjectRepository(Photo) private photoRepository: Repository<Photo>,) {}
-  
+  constructor(
+    @InjectRepository(Photo) private photoRepository: Repository<Photo>,
+  ) {}
+
   create(createPhotoDto: CreatePhotoDto) {
     const newPhoto = this.photoRepository.create(createPhotoDto);
     return this.photoRepository.save(newPhoto);
@@ -20,7 +22,7 @@ export class PhotosService {
 
   findOne(id: number) {
     const photoFind = this.photoRepository.findOne({ where: { id } });
-    if(!photoFind) {
+    if (!photoFind) {
       throw new HttpException('Photo not found', HttpStatus.NOT_FOUND);
     }
     return photoFind;
@@ -28,7 +30,7 @@ export class PhotosService {
 
   remove(id: number) {
     const photoExists = this.photoRepository.findOne({ where: { id } });
-    if(!photoExists) {
+    if (!photoExists) {
       throw new HttpException('Photo not found', HttpStatus.NOT_FOUND);
     }
     return this.photoRepository.delete({ id });

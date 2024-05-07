@@ -3,12 +3,12 @@ import { Pet } from '../../pets/entities/pet.entity';
 
 @Entity({ name: 'photos' })
 export class Photo {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column()
-    path: string;
+  @Column()
+  path: string;
 
-    @ManyToOne(() => Pet, pets => pets.photos)
-    pet: Pet;
+  @ManyToOne(() => Pet, (pets) => pets.photos)
+  pet: Pet;
 }

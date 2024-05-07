@@ -9,11 +9,13 @@ import { Auth } from './entities/auth.entity';
 import { JwtStrategy } from './jwt.strategy';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Auth]), JwtModule.register({
-    secret: jwtConstants.secret,
-    signOptions: { expiresIn: '1d' },
-  }),
-],
+  imports: [
+    TypeOrmModule.forFeature([User, Auth]),
+    JwtModule.register({
+      secret: jwtConstants.secret,
+      signOptions: { expiresIn: '1d' },
+    }),
+  ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
 })
