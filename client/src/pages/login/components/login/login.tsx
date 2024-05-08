@@ -7,8 +7,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function Login(props: any) {
     const [mail, setMail] = React.useState<string>('')
     const [password, setPassword] = React.useState<string>('')
-    const [translateX, setTranslateX] = React.useState<number>(Dimensions.get('window').width / 2)
-    const [translateY, setTranslateY] = React.useState<number>(Dimensions.get('window').height / 2)
 
     function handleLogin() {
         fetch(store.getState().url + '/auth/login', {
