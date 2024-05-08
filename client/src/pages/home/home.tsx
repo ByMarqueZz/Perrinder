@@ -3,6 +3,7 @@ import { View, Image, Text, Animated, PanResponder, Dimensions, TouchableWithout
 import styles from './home_styles';
 import store from '../../redux/store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getStorage, ref, getDownloadURL } from "firebase/storage";
 
 const Pets = [
     { id: "1", name: "Luna", image: 'https://static.fundacion-affinity.org/cdn/farfuture/PVbbIC-0M9y4fPbbCsdvAD8bcjjtbFc0NSP3lRwlWcE/mtime:1643275542/sites/default/files/los-10-sonidos-principales-del-perro.jpg' },
@@ -14,12 +15,81 @@ const Pets = [
 
 export default function Home(props: any) {
     const [pets, setPets] = useState<any>(Pets);
+    const [imagePets, setImagePets] = useState<any[]>([]);
+    const [indice, setIndice] = useState(0);
+    const [indicePet, setIndicePet] = useState(0);
     const position = useRef(new Animated.ValueXY()).current;
     const SCREEN_WIDTH = Dimensions.get('window').width;
     const [image, setImage] = useState<false | string>(false);
+    const [isLoaded, setIsLoaded] = useState(false);
+    const [panResponder, setPanResponder] = useState(null);
 
-    const panResponder = useRef(
-        PanResponder.create({
+    const rotateCard = position.x.interpolate({
+        inputRange: [-SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2],
+        outputRange: ['-10deg', '0deg', '10deg'],
+        extrapolate: 'clamp',
+    });
+
+    const nextCard = () => {
+        setImage(false);
+        setPets(prevPets => prevPets.slice(1));
+    };
+
+    useEffect(() => {
+        if (imagePets.length > 0) {
+            setPanResponder(createPanResponder());
+        }
+    }, [imagePets]);
+
+    useEffect(() => {
+        position.setValue({ x: 0, y: 0 });
+    }, [pets]);
+
+    useEffect(() => {
+        getPets();
+    }, []);
+
+    async function getPets() {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const response = await fetch(store.getState().url + '/pets', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch pets');
+            }
+
+            const data = await response.json();
+
+            const promises = data.map(async (pet: any) => {
+                const photoUrls = await Promise.all(pet.photos.map(async (photo: any) => {
+                    const storage = getStorage();
+                    const storageRef = ref(storage, photo.path);
+                    return getDownloadURL(storageRef);
+                }));
+
+                return {
+                    id: pet.id,
+                    name: pet.name,
+                    images: photoUrls
+                };
+            });
+
+            const petsWithImages = await Promise.all(promises);
+            setPets(data)
+            setImagePets(petsWithImages);
+            setIsLoaded(true);
+        } catch (error) {
+            console.error('Error fetching pets:', error);
+        }
+    }
+    function createPanResponder() {
+        return PanResponder.create({
             onStartShouldSetPanResponder: (event, gesture) => {
                 this.startTime = Date.now(); // Registra el tiempo de inicio
                 this.startX = gesture.x0; // Registra la posición x de inicio
@@ -61,66 +131,35 @@ export default function Home(props: any) {
                 // Clicks
                 if (this.endX > 280 && duration < 200) {
                     //Tap right
-                    setImage("https://t2.gstatic.com/licensed-image?q=tbn:ANd9GcQOO0X7mMnoYz-e9Zdc6Pe6Wz7Ow1DcvhEiaex5aSv6QJDoCtcooqA7UUbjrphvjlIc");
+                    // Calculate the next image
+                    setIndicePet(prevIndicePet => {
+                        if (prevIndicePet < imagePets[indice].images.length - 1) {
+                            return prevIndicePet + 1;
+                        } else {
+                            return prevIndicePet;
+                        }
+                    });
                 } else if (this.endX < 120 && duration < 200) {
                     //Tap left
-                    setImage(pets[0].image);
+                    // Calculate the previous image
+                    setIndicePet(prevIndicePet => {
+                        if (prevIndicePet > 0) {
+                            return prevIndicePet - 1;
+                        } else {
+                            return prevIndicePet;
+                        }
+                    });
                 }
             },
         })
-    ).current;
-
-
-    const rotateCard = position.x.interpolate({
-        inputRange: [-SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2],
-        outputRange: ['-10deg', '0deg', '10deg'],
-        extrapolate: 'clamp',
-    });
-
-    const nextCard = () => {
-        setImage(false);
-        setPets(prevPets => prevPets.slice(1));
-    };
-
-    useEffect(() => {
-        position.setValue({ x: 0, y: 0 });
-    }, [pets]);
-
-    useEffect(() => {
-        getPets();
-    }, []);
-
-    async function getPets() {
-        const token = await AsyncStorage.getItem('token')
-        fetch(store.getState().url + '/pets', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
-            }
-        })
-            .then(response => {
-                return response.json();
-            })
-            .then(async data => {
-                console.log(data);
-                const petsWithBlobs = await Promise.all(data.map(async (pet: any) => {
-                    const photosPromises = pet.photos.map(async (photo: any) => {
-                        const blob = bufferToBlob(photo.file.data.data, photo.file.type);
-                        return { ...photo, blob };
-                    });
-                    const photos = await Promise.all(photosPromises);
-                    return { ...pet, photos };
-                }));
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
-
     }
 
-    function bufferToBlob(buffer: any, type: string) {
-        return new Blob([buffer], { type: type });
+    if (!isLoaded) {
+        return (
+            <View style={styles.container}>
+                <Text>Cargando...</Text>
+            </View>
+        );
     }
 
 
@@ -136,7 +175,6 @@ export default function Home(props: any) {
             </View>
         );
     }
-
     return (
         <View style={styles.container}>
             {pets.map((pet, index) => {
@@ -150,7 +188,7 @@ export default function Home(props: any) {
                             {
                                 image ?
                                     <Image style={styles.image} source={{ uri: image }} /> :
-                                    <Image style={styles.image} source={{ uri: pets[index].image }} />
+                                    <Image style={styles.image} source={{ uri: imagePets[index].images[indicePet] }} />
                             }
                             <Text style={styles.name}>{pet.name}</Text>
                         </Animated.View>

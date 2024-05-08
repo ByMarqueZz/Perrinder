@@ -7,16 +7,41 @@ export default StyleSheet.create({
         width: '100%',
         height: '100%',
         alignItems: 'center',
-        justifyContent: 'center',
-    },
-    input: {
-        width: '75%',
-        padding: 15,
-        borderRadius: 20,
+        marginTop: 80,
     },
     image: {
         width: 150,
         height: 150,
         borderRadius: 75,
     },
+    header: {
+        backgroundColor: '#f0f0f0',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    textHeader: {
+        fontSize: 25,
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
+    textMail: {
+        fontSize: 15,
+        textAlign: 'center',
+        color: 'gray',
+    },
+    absolute: {
+        position: 'absolute',
+        top: 0,
+        right: '5%',
+        color: 'red',
+    },
+    headerContent: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 5,
+        paddingBottom: 20,
+        borderBottomWidth: .5,
+        borderColor: 'gray',
+        width: '100%',
+    }
 });

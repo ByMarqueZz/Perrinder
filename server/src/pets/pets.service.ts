@@ -24,9 +24,8 @@ export class PetsService {
     // si hay fotos, las guardamos
     if (photos) {
       photos.forEach(async (photoUrl) => {
-        const savedPhotoPath = await this.savePhotos(photoUrl, newPet.id);
         const newPhoto = this.photoRepository.create({
-          path: savedPhotoPath,
+          path: photoUrl,
           pet: newPet,
         });
         await this.photoRepository.save(newPhoto);
@@ -64,20 +63,20 @@ export class PetsService {
       relations: ['photos'],
     });
 
-    const petsWithFiles = await Promise.all(
-      petsWithPhotos.map(async (pet) => {
-        const photosWithFiles = await Promise.all(
-          pet.photos.map(async (photo) => {
-            const file = await this.readFile(photo.path);
-            return { ...photo, file };
-          }),
-        );
+    // const petsWithFiles = await Promise.all(
+    //   petsWithPhotos.map(async (pet) => {
+    //     const photosWithFiles = await Promise.all(
+    //       pet.photos.map(async (photo) => {
+    //         const file = await this.readFile(photo.path);
+    //         return { ...photo, file };
+    //       }),
+    //     );
 
-        return { ...pet, photos: photosWithFiles };
-      }),
-    );
+    //     return { ...pet, photos: photosWithFiles };
+    //   }),
+    // );
 
-    return petsWithFiles;
+    return petsWithPhotos;
   }
 
   async readFile(photoPath: string) {

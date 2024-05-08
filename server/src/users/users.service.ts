@@ -25,11 +25,11 @@ export class UsersService {
   }
 
   getAllUsers() {
-    return this.userRepositry.find({});
+    return this.userRepositry.find({relations: ['pets', 'pets.photos']});
   }
 
   async getUserById(id: number) {
-    const userFound = await this.userRepositry.findOne({ where: { id: id } });
+    const userFound = await this.userRepositry.findOne({ where: { id: id }, relations: ['pets', 'pets.photos']});
     if (!userFound) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }

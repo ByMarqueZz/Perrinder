@@ -4,62 +4,26 @@ import styles from "./createpet_styles";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import store from "../../../../redux/store";
 import * as ImagePicker from 'expo-image-picker';
-import Autocomplete from 'react-native-autocomplete-input';
+import { getStorage, ref, uploadBytes } from "firebase/storage";
 
 export default function CreatePet(props: any) {
     // imagen
     const [images, setImages] = React.useState<string[]>([]);
     // formulario
-    const [name, setName] = React.useState('');
+    const [name, setName] = React.useState(props.pet.name || '');
     const [gender, setGender] = React.useState('');
     const [breed, setBreed] = React.useState('');
     const [weight, setWeight] = React.useState('');
     const [age, setAge] = React.useState('');
     const [location, setLocation] = React.useState('');
-    const [description, setDescription] = React.useState('');
-    const [breeds, setBreeds] = React.useState<string[]>([]);
-    const [currentTextBreed, setCurrentTextBreed] = React.useState<string>('');
+    const [description, setDescription] = React.useState(props.pet.description || '');
 
-    // React.useEffect(() => {
-    //     getTokenPetFinder()
-    // }, [])
+    React.useEffect(() => {
+        if (props.images) {
+            setImages(props.images)
+        }
+    }, []);
 
-
-    // /**
-    //  * Función para obtener las razas que hay
-    //  */
-    // function getTokenPetFinder() {
-    //     fetch('https://api.petfinder.com/v2/oauth2/token', {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //         },
-    //         body: JSON.stringify({
-    //             grant_type: 'client_credentials',
-    //             client_id: 'TcwSrYYl9VhFboIlvAPpOcTw2s73FZs0kzVODJar1VytGL3W7R',
-    //             client_secret: 'Dsa1bacREBHc6uCfPVNMdgPgjySiyCj54bRzTrc4'
-    //         })
-    //     })
-    //         .then(response => response.json())
-    //         .then(data => {
-    //             let token = data.access_token
-    //             fetch('https://api.petfinder.com/v2/types/dog/breeds', {
-    //                 method: 'GET',
-    //                 headers: {
-    //                     'Content-Type': 'application/json',
-    //                     "Authorization": "Bearer " + token,
-    //                 },
-    //             })
-    //                 .then(response => response.json())
-    //                 .then(data => {
-    //                     setBreeds(data.breeds.map((breed: any) => breed.name))
-    //                 })
-    //         })
-    // }
-
-    /**
-     * Función para seleccionar una imagen de la galería
-     */
     async function selectImage() {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -67,19 +31,71 @@ export default function CreatePet(props: any) {
             aspect: [4, 3],
             quality: 1,
         });
-
-
+    
         if (!result.canceled) {
+            const imageBlob = await urlToBlob(result.assets[0].uri);
             setImages([...images, result.assets[0].uri]);
         }
     };
+    
+    async function urlToBlob(uri) {
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.onload = function() {
+                resolve(xhr.response);
+            };
+            xhr.onerror = function() {
+                reject(new Error('Failed to convert URL to Blob'));
+            };
+            xhr.responseType = 'blob';
+            xhr.open('GET', uri, true);
+            xhr.send(null);
+        });
+    }
+    
+    async function uploadToFirebase(blob) {
+        
+        const storage = getStorage();
+        const storageRef = ref(storage, 'images/' + Date.now());
+    
+        try {
+            const snapshot = await uploadBytes(storageRef, blob);
+            return snapshot.metadata.fullPath;
+            // Aquí puedes hacer lo que necesites con la URL de descarga
+        } catch (error) {
+            console.error('Error uploading file:', error);
+        }
+    }
 
-    async function handleSubmit() {
-        // cogemos token y usuario del storage
-        const token = await AsyncStorage.getItem('token')
+    const handleSubmit = async () => {
+        const token = await AsyncStorage.getItem('token');
         const user = await AsyncStorage.getItem('user')
         const userId = JSON.parse(user).id
-
+        const uploadTasks = images.map(async (image) => {
+            const imageBlob = await urlToBlob(image);
+            return uploadToFirebase(imageBlob);
+        });
+        const array = await Promise.all(uploadTasks);
+        if(props.pet) {
+            fetch(store.getState().url + '/pets/' + props.pet.id, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({
+                    name: name,
+                    gender: gender,
+                    breed: breed,
+                    weight: weight,
+                    age: age,
+                    location: location,
+                    description: description,
+                    user: userId,
+                    photos: array
+                })
+            })
+        }
         fetch(store.getState().url + '/pets', {
             method: 'POST',
             headers: {
@@ -95,14 +111,9 @@ export default function CreatePet(props: any) {
                 location: location,
                 description: description,
                 user: userId,
-                photos: images
+                photos: array
             })
         })
-            .then(response => response.json())
-            .then(data => {
-                props.goBack()
-                alert('Perro creado correctamente')
-            })
     }
 
     /**
@@ -116,7 +127,6 @@ export default function CreatePet(props: any) {
     return (
         <>
             <View style={styles.container}>
-                <Text style={{ textAlign: 'center', fontSize: 30, marginTop: 60 }}>Crea tu mascota</Text>
                 {/* Bucle para las fotos */}
                 <View style={styles.containerImgs}>
                     {
@@ -139,14 +149,14 @@ export default function CreatePet(props: any) {
                 </View>
                 <View style={styles.containerDiv}>
 
-                    <TextInput style={styles.input} placeholder="Nombre" onChange={(e) => {
+                    <TextInput style={styles.input} placeholder={props.pet.name != '' ? props.pet.name : 'Nombre'} onChange={(e) => {
                         setName(e.nativeEvent.text)
                     }} />
                     <TextInput style={styles.inputDescripcion} onChange={(e) => {
                         setDescription(e.nativeEvent.text)
-                    }} multiline = {true}
-                    numberOfLines = {4}
-                    placeholder={`Descripción\n(De donde eres, como es tu perro,\nedad, género...)`}/>
+                    }} multiline={true}
+                        numberOfLines={4}
+                        placeholder={props.pet.description != '' ? props.pet.description : 'Descripción (Como es tu perro, edad, género...'} />
                     {/* <TextInput style={styles.input} placeholder="Género (M o F)" value={gender} onChange={(e) => {
                         if(e.nativeEvent.text === 'M' || e.nativeEvent.text === 'F') {
                             setGender(e.nativeEvent.text)
@@ -181,12 +191,11 @@ export default function CreatePet(props: any) {
                     <TextInput style={styles.input} placeholder="Localidad" onChange={(e) => {
                         setLocation(e.nativeEvent.text)
                     }} /> */}
-                    
+
 
                 </View>
                 <View style={styles.container_buttons}>
                     <Text onPress={handleSubmit} style={{ color: 'blue' }}>Guardar perro</Text>
-                    <Text onPress={props.goBack} style={{ color: 'red' }}>Cancelar</Text>
                 </View>
             </View>
         </>

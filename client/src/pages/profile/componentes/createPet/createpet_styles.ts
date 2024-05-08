@@ -58,7 +58,7 @@ export default StyleSheet.create({
         justifyContent: 'center',
         gap: 10,
         position: 'absolute',
-        top: 100,
+        top: 0,
         padding: 10,
         width: '100%',
     },
