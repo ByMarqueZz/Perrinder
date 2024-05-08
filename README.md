@@ -28,7 +28,7 @@ Para el desarrollo de la aplicación se ha utilizado React Native con Expo para 
 Para explicar el desarrollo establecido en el lado de la aplicación móvil he usado esta estructura de carpetas:
 
 <br><br>
-<img src="https://i.imgur.com/1Z2Z2Zz.png" alt="Estructura de carpetas">
+<img src="https://github.com/ByMarqueZz/Perrinder/blob/master/client/assets/readme/client.png" alt="Estructura de carpetas">
 <br><br>
 
 Contamos con las siguientes carpetas y archivos:
@@ -45,7 +45,7 @@ Para conectar la aplicación móvil con la parte del backend utilizamos peticion
 El servidor se ha desarrollado con Node y NestJS. La estructura de carpetas es la siguiente:
 
 <br><br>
-<img src="https://i.imgur.com/1Z2Z2Zz.png" alt="Estructura de carpetas">
+<img src="https://github.com/ByMarqueZz/Perrinder/blob/master/client/assets/readme/server.png" alt="Estructura de carpetas">
 <br><br>
 
 Contamos con una carpeta para cada tabla de nuestra base de datos y dentro de ella contamos con entity, create_dto, update_dto, controller, module y service. Controlando tanto los datos de la entidad y el gestión de base de datos como los END POINTS y la lógica de negocio. Para la seguridad de la aplicación backend he implementado JWT. Es un sistema de autenticación que se basa en la generación de un token que se envía al cliente y este lo envía en cada petición para comprobar que está autenticado y así evitar que cualquier persona pueda acceder a los datos de la aplicación. Para permitir que el cliente pueda acceder a los datos de la aplicación he implementado CORS. Es un sistema que permite que un cliente pueda acceder a los datos de un servidor que no está en el mismo dominio y a parte se utiliza la tecnología de WebSockets para el chat de la aplicación.
@@ -53,7 +53,7 @@ Contamos con una carpeta para cada tabla de nuestra base de datos y dentro de el
 ### Base de datos
 A continuación se muestra el diagrama de la base de datos. Aún le quedan cosas como los matchs y demás que iré actualizando
 <br><br>
-<img src="https://creately.com/static/assets/diagram-type/hero-images/database-design-es.webp" alt="Diagrama de la base de datos">
+<img src="https://github.com/ByMarqueZz/Perrinder/blob/master/client/assets/readme/database.png" alt="Diagrama de la base de datos">
 <br><br>
 
 ## Conclusiones
