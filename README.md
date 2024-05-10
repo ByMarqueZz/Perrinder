@@ -39,7 +39,7 @@ Contamos con las siguientes carpetas y archivos:
 - **redux**: En esta carpeta se encuentran los states de la aplicación.
 - **App.tsx**: Archivo principal de la aplicación.
 
-Para conectar la aplicación móvil con la parte del backend utilizamos peticiones HTTP/HTTPS tanto GET, POST, PUT y DELETE. Para la gestión de las fotos quiero utilizar Firebase seguramente y implemento una solución con mi propio servidor
+Para conectar la aplicación móvil con la parte del backend utilizamos peticiones HTTP/HTTPS GET, POST, PUT y DELETE. Para la gestión de las fotos quiero utilizar Firebase.
 
 ### Servidor
 El servidor se ha desarrollado con Node y NestJS. La estructura de carpetas es la siguiente:
