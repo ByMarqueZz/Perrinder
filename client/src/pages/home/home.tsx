@@ -5,16 +5,8 @@ import store from '../../redux/store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
 
-const Pets = [
-    { id: "1", name: "Luna", image: 'https://static.fundacion-affinity.org/cdn/farfuture/PVbbIC-0M9y4fPbbCsdvAD8bcjjtbFc0NSP3lRwlWcE/mtime:1643275542/sites/default/files/los-10-sonidos-principales-del-perro.jpg' },
-    { id: "2", name: "Max", image: 'https://www.nationalgeographic.com.es/medio/2023/10/25/doberman-1_f3e49bcc_231025192836_800x800.jpg' },
-    { id: "3", name: "Coco", image: 'https://ichef.bbci.co.uk/news/640/cpsprodpb/15665/production/_107435678_perro1.jpg' },
-    { id: "4", name: "Bella", image: 'https://estaticos-cdn.prensaiberica.es/clip/823f515c-8143-4044-8f13-85ea1ef58f3a_16-9-discover-aspect-ratio_default_0.jpg' },
-    { id: "5", name: "Rocky", image: 'https://hips.hearstapps.com/hmg-prod/images/gettyimages-1422023439-64f1eaf518ace.jpg?crop=0.665xw:0.998xh;0.0641xw,0&resize=1200:*' },
-];
-
 export default function Home(props: any) {
-    const [pets, setPets] = useState<any>(Pets);
+    const [pets, setPets] = useState<any>([]);
     const [imagePets, setImagePets] = useState<any[]>([]);
     const [indice, setIndice] = useState(0);
     const [indicePet, setIndicePet] = useState(0);
@@ -23,6 +15,7 @@ export default function Home(props: any) {
     const [image, setImage] = useState<false | string>(false);
     const [isLoaded, setIsLoaded] = useState(false);
     const [panResponder, setPanResponder] = useState(null);
+    const [likeTextPosition, setLikeTextPosition] = useState({ x: 0, y: 0 });
 
     const rotateCard = position.x.interpolate({
         inputRange: [-SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2],
@@ -32,6 +25,7 @@ export default function Home(props: any) {
 
     const nextCard = () => {
         setImage(false);
+        setLikeTextPosition({ x: 0, y: 0 });
         setPets(prevPets => prevPets.slice(1));
     };
 
@@ -46,47 +40,59 @@ export default function Home(props: any) {
     }, [pets]);
 
     useEffect(() => {
-        getPets();
+        getPets()
+            .then(() => {
+                console.table([{ pets: pets, imagePets: imagePets, image: imagePets[0].images[indicePet] }])
+            })
+            .finally(() => {
+                setIsLoaded(true);
+            });
     }, []);
 
     async function getPets() {
-        try {
-            const token = await AsyncStorage.getItem('token');
-            const response = await fetch(store.getState().url + '/pets', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch pets');
+        const token = await AsyncStorage.getItem('token');
+        const user = await AsyncStorage.getItem('user');
+        const userParsed = user ? JSON.parse(user) : null;
+        const response = await fetch(store.getState().url + '/pets/' + userParsed.id.toString(), {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
             }
+        });
 
-            const data = await response.json();
+        if (!response.ok) {
+            await AsyncStorage.removeItem('token');
+            await AsyncStorage.removeItem('user');
+            props.loadUserFromStorage();
+            throw new Error('Failed to fetch pets');
+        }
 
-            const promises = data.map(async (pet: any) => {
-                const photoUrls = await Promise.all(pet.photos.map(async (photo: any) => {
-                    const storage = getStorage();
-                    const storageRef = ref(storage, photo.path);
-                    return getDownloadURL(storageRef);
-                }));
+        const data = await response.json();
 
-                return {
-                    id: pet.id,
-                    name: pet.name,
-                    images: photoUrls
-                };
-            });
+        const promises = data.map(async (pet: any) => {
+            const photoUrls = await Promise.all(pet.photos.map(async (photo: any) => {
+                // firebase storage
+                const storage = getStorage();
+                const storageRef = ref(storage, photo.path);
+                return getDownloadURL(storageRef);
+            }));
 
-            const petsWithImages = await Promise.all(promises);
+            return {
+                id: pet.id,
+                name: pet.name,
+                images: photoUrls
+            };
+        });
+
+        const petsWithImages = await Promise.all(promises);
+        if (data.length !== 0 && petsWithImages.length !== 0) {
             setPets(data)
             setImagePets(petsWithImages);
-            setIsLoaded(true);
-        } catch (error) {
-            console.error('Error fetching pets:', error);
+        } else {
+            alert('No hay más mascotas para mostrar')
         }
+
     }
     function createPanResponder() {
         return PanResponder.create({
@@ -97,6 +103,7 @@ export default function Home(props: any) {
             },
             onPanResponderMove: (event, gesture) => {
                 position.setValue({ x: gesture.dx, y: gesture.dy });
+                setLikeTextPosition({ x: gesture.dx, y: gesture.dy });
             },
             onPanResponderRelease: (event, gesture) => {
                 this.endTime = Date.now(); // Registra el tiempo de finalización
@@ -106,7 +113,7 @@ export default function Home(props: any) {
 
                 // Swipes
                 if (gesture.dx > 120) {
-                    // Swipe right
+                    // Swipe right and like
                     Animated.spring(position, {
                         toValue: { x: SCREEN_WIDTH + 100, y: gesture.dy },
                         useNativeDriver: false,
@@ -114,7 +121,7 @@ export default function Home(props: any) {
                         nextCard();
                     });
                 } else if (gesture.dx < -120) {
-                    // Swipe left
+                    // Swipe left and dislike
                     Animated.spring(position, {
                         toValue: { x: -SCREEN_WIDTH - 100, y: gesture.dy },
                         useNativeDriver: false,
@@ -123,6 +130,7 @@ export default function Home(props: any) {
                     });
                 } else {
                     // Return to initial position
+                    setLikeTextPosition({ x: 0, y: 0 });
                     Animated.spring(position, {
                         toValue: { x: 0, y: 0 },
                         useNativeDriver: false,
@@ -166,12 +174,9 @@ export default function Home(props: any) {
     if (pets.length === 0) {
         return (
             <View style={styles.container}>
-                <Text>No hay más mascotas</Text>
-                <Text onPress={() => {
-                    getPets();
-                }} style={{
-                    color: 'red'
-                }}>Reload</Text>
+                <Image source={require('../../../assets/nodog.png')} />
+                <Text>¡Vaya...!</Text>
+                <Text>Parece que ya has visto todas las mascotas</Text>
             </View>
         );
     }
@@ -181,16 +186,39 @@ export default function Home(props: any) {
                 if (index == 0) {
                     return (
                         <Animated.View
-                            {...panResponder.panHandlers}
+                            {...(panResponder && panResponder.panHandlers)}
                             key={pet.id}
                             style={[position.getLayout(), styles.card, { transform: [{ rotate: rotateCard }] }]}
                         >
+                            {
+                                // Like and dislike text
+                                likeTextPosition.x > 0 ? <View style={[styles.likeTextView]}>
+                                    <Text style={styles.likeText}>LIKE</Text>
+                                </View> : null
+                            }
+                            {
+                                likeTextPosition.x < 0 ? <View style={[styles.dislikeTextView]}>
+
+                                    <Text style={styles.dislikeText}>DISLIKE</Text>
+                                </View> : null
+                            }
+                            {
+                                // photo index
+                                imagePets[index].images.length > 1 ? <View style={styles.photoIndex}>
+                                    {
+                                        imagePets[index].images.map((image, index) => {
+                                            return <Text key={index} style={[styles.photoIndexText, { color: indicePet == index ? 'black' : 'grey' }]}>______</Text>
+                                        })
+                                    }
+                                </View> : null
+                            }
                             {
                                 image ?
                                     <Image style={styles.image} source={{ uri: image }} /> :
                                     <Image style={styles.image} source={{ uri: imagePets[index].images[indicePet] }} />
                             }
                             <Text style={styles.name}>{pet.name}</Text>
+                            <Text style={styles.description}>{pet.description}</Text>
                         </Animated.View>
                     );
 
@@ -201,12 +229,14 @@ export default function Home(props: any) {
                             key={pet.id}
                             style={[styles.cardAbsolute]}
                         >
-                            <Image style={styles.image} source={{ uri: pets[index].image }} />
+                            <Image style={styles.image} source={{ uri: imagePets[index].images[indicePet] }} />
                             <Text style={styles.name}>{pet.name}</Text>
+                            <Text style={styles.description}>{pet.description}</Text>
                         </Animated.View>
                     );
                 }
             })}
         </View>
     );
+
 }

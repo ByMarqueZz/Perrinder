@@ -1,6 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React, { useEffect } from 'react';
+import { Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Home from '../pages/home/home';
 import Chat from '../pages/chat/chat';
@@ -71,17 +72,17 @@ export default function AppNavigation() {
 
                     if (route.name === 'home') {
                         iconName = focused
-                            ? 'home'
-                            : 'home-outline';
+                            ? require('../../assets/footer/home_focus.png')
+                            : require('../../assets/footer/home.png');
                     } else if (route.name === 'sms') {
-                        iconName = focused ? 'chatbubble-ellipses' : 'chatbubble-ellipses-outline';
+                        iconName = focused ? require('../../assets/footer/sms_focus.png') : require('../../assets/footer/sms.png');
                     } else if (route.name === 'profile') {
-                        iconName = focused ? 'person' : 'person-outline';
+                        iconName = focused ? require('../../assets/footer/profile_focus.png') : require('../../assets/footer/profile.png');
                     } else {
-                        iconName = focused ? 'flame' : 'flame-outline';
+                        iconName = focused ? require('../../assets/footer/match_focus.png') : require('../../assets/footer/match.png');
                     }
 
-                    return <Ionicons name={iconName} size={size} color={color} />;
+                    return <Image source={iconName} style={{ width: 24, height: 24 }} />;
                 },
                 tabBarActiveTintColor: 'tomato',
                 tabBarInactiveTintColor: 'gray',

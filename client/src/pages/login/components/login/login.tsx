@@ -15,7 +15,7 @@ export default function Login(props: any) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                mail: mail,
+                email: mail,
                 password: password
             })
         }).then((res) => {

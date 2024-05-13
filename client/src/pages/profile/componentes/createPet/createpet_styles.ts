@@ -22,7 +22,7 @@ export default StyleSheet.create({
         padding: 15,
         borderRadius: 20,
         fontSize: 18,
-        height: 150,
+        height: 100,
         textAlignVertical: 'top',
     },
     autocomplete: {
@@ -40,7 +40,7 @@ export default StyleSheet.create({
         display: 'flex',
         flexDirection: 'row',
         gap: 10,
-        paddingTop: 20,
+        paddingTop: 10,
         alignSelf: 'center',
     },
     // backgrounImageHeader: {

@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
     },
     name: {
         position: 'absolute',
-        bottom: 20,
+        bottom: 50,
         left: 20,
         fontSize: 32,
         fontWeight: 'bold',
@@ -46,6 +46,61 @@ const styles = StyleSheet.create({
         textShadowOffset: { width: 2, height: 2 },
         textShadowRadius: 2,
     },
+    description: {
+        position: 'absolute',
+        bottom: 30,
+        left: 20,
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: 'white',
+        textShadowColor: 'black',
+        textShadowOffset: { width: 2, height: 2 },
+        textShadowRadius: 2,
+    },
+    likeTextView: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        zIndex: 2,
+        backgroundColor: 'green',
+        padding: 10,
+        borderRadius: 5,
+    },
+    likeText: {
+        color: 'white',
+        borderColor: 'black',
+        fontSize: 32,
+    },
+    dislikeTextView: {
+        position: 'absolute',
+        top: 10,
+        left: 10,
+        zIndex: 2,
+        padding: 10,
+        borderRadius: 5,
+        backgroundColor: 'red',
+    },
+    dislikeText: {
+        color: 'white',
+        borderColor: 'black',
+        fontSize: 32,
+    },
+    photoIndex: {
+        position: 'absolute',
+        top: -10,
+        zIndex: 1,
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 5,
+    },
+    photoIndexText: {
+        color: 'white',
+        fontSize: 20,
+        textAlign: 'center',
+    }
 });
 
 export default styles;

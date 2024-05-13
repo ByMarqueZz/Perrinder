@@ -36,6 +36,7 @@ export default function Profile(props: any) {
         })
             .then((response) => response.json())
             .then(async (data) => {
+                if(data.pets.length === 0) return 
                 setPet(data.pets[0])
                 const promises = data.pets.map(async (pet: any) => {
                     const photoUrls = await Promise.all(pet.photos.map(async (photo: any) => {
@@ -71,14 +72,14 @@ export default function Profile(props: any) {
         <View style={styles.container}>
             <Text onPress={handleLogout} style={styles.absolute}>Logout</Text>
             <View style={styles.header}>
-                <Image style={styles.image} source={{ uri: images[0] }} />
+                <Image style={styles.image} source={{ uri: images[0] ? images[0] : 'https://cdn-icons-png.flaticon.com/512/5987/5987462.png' }} />
             </View>
             <View style={styles.headerContent}>
                 <Text style={styles.textHeader}>{user.firstName} {user.lastName}</Text>
                 <Text style={styles.textMail}>{user.email}</Text>
                 <Text style={styles.textMail}>{user.phone}</Text>
             </View>
-            <CreatePet pet={pet} images={images}/>
+            <CreatePet pet={pet ? pet : null} images={images}/>
         </View>
     )
 }

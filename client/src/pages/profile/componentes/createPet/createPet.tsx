@@ -10,13 +10,13 @@ export default function CreatePet(props: any) {
     // imagen
     const [images, setImages] = React.useState<string[]>([]);
     // formulario
-    const [name, setName] = React.useState(props.pet.name || '');
+    const [name, setName] = React.useState(props.pet ? props.pet.name : '');
     const [gender, setGender] = React.useState('');
     const [breed, setBreed] = React.useState('');
     const [weight, setWeight] = React.useState('');
     const [age, setAge] = React.useState('');
     const [location, setLocation] = React.useState('');
-    const [description, setDescription] = React.useState(props.pet.description || '');
+    const [description, setDescription] = React.useState(props.pet ? props.pet.description : '');
 
     React.useEffect(() => {
         if (props.images) {
@@ -31,20 +31,20 @@ export default function CreatePet(props: any) {
             aspect: [4, 3],
             quality: 1,
         });
-    
+
         if (!result.canceled) {
             const imageBlob = await urlToBlob(result.assets[0].uri);
             setImages([...images, result.assets[0].uri]);
         }
     };
-    
+
     async function urlToBlob(uri) {
         return new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
-            xhr.onload = function() {
+            xhr.onload = function () {
                 resolve(xhr.response);
             };
-            xhr.onerror = function() {
+            xhr.onerror = function () {
                 reject(new Error('Failed to convert URL to Blob'));
             };
             xhr.responseType = 'blob';
@@ -52,12 +52,12 @@ export default function CreatePet(props: any) {
             xhr.send(null);
         });
     }
-    
+
     async function uploadToFirebase(blob) {
-        
+
         const storage = getStorage();
         const storageRef = ref(storage, 'images/' + Date.now());
-    
+
         try {
             const snapshot = await uploadBytes(storageRef, blob);
             return snapshot.metadata.fullPath;
@@ -76,28 +76,43 @@ export default function CreatePet(props: any) {
             return uploadToFirebase(imageBlob);
         });
         const array = await Promise.all(uploadTasks);
-        if(props.pet) {
-            fetch(store.getState().url + '/pets/' + props.pet.id, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                },
-                body: JSON.stringify({
-                    name: name,
-                    gender: gender,
-                    breed: breed,
-                    weight: weight,
-                    age: age,
-                    location: location,
-                    description: description,
-                    user: userId,
-                    photos: array
-                })
+        if (props.pet) {
+            updatePet(token, userId, array)
+            .then(() => {
+                setName('')
+            })
+        } else {
+            createPet(token, userId, array).then(() => {
+                setName('')
             })
         }
-        fetch(store.getState().url + '/pets', {
+        
+    }
+
+    async function createPet(token, userId, array) {
+        return await fetch(store.getState().url + '/pets', {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({
+                name: name,
+                gender: gender,
+                breed: breed,
+                weight: weight,
+                age: age,
+                location: location,
+                description: description,
+                user: userId,
+                photos: array
+            })
+        })
+    }
+
+    async function updatePet(token, userId, array) {
+        await fetch(store.getState().url + '/pets/' + props.pet.id, {
+            method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + token
@@ -149,14 +164,14 @@ export default function CreatePet(props: any) {
                 </View>
                 <View style={styles.containerDiv}>
 
-                    <TextInput style={styles.input} placeholder={props.pet.name != '' ? props.pet.name : 'Nombre'} onChange={(e) => {
+                    <TextInput style={styles.input} placeholder={props.pet ? props.pet.name : 'Nombre'} onChange={(e) => {
                         setName(e.nativeEvent.text)
                     }} />
                     <TextInput style={styles.inputDescripcion} onChange={(e) => {
                         setDescription(e.nativeEvent.text)
                     }} multiline={true}
-                        numberOfLines={4}
-                        placeholder={props.pet.description != '' ? props.pet.description : 'Descripción (Como es tu perro, edad, género...'} />
+                        numberOfLines={3}
+                        placeholder={props.pet ? props.pet.description : 'Descripción (Como es tu perro, edad, género...'} />
                     {/* <TextInput style={styles.input} placeholder="Género (M o F)" value={gender} onChange={(e) => {
                         if(e.nativeEvent.text === 'M' || e.nativeEvent.text === 'F') {
                             setGender(e.nativeEvent.text)

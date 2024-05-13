@@ -32,10 +32,10 @@ export class PetsController {
     return this.petsService.create(createPetDto);
   }
 
-  @Get()
+  @Get(':user')
   @ApiResponse({ status: 200, description: 'Returns all pets.' })
-  findAll() {
-    return this.petsService.findAll();
+  findAll(@Param('user') userId: string){
+    return this.petsService.findAll(userId);
   }
 
   @Get(':id')

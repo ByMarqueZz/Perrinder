@@ -7,11 +7,13 @@ import { Repository } from 'typeorm';
 import { Photo } from 'src/photos/entities/photo.entity';
 import * as fs from 'fs';
 import * as path from 'path';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class PetsService {
   constructor(
     @InjectRepository(Pet) private petRepository: Repository<Pet>,
+    @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Photo) private photoRepository: Repository<Photo>,
   ) { }
 
@@ -50,7 +52,6 @@ export class PetsService {
         }),
       })
       const data = await res.json();
-      console.log(data)
       return data.data.url;
     } catch (error) {
       console.error('Error al guardar la foto:', error);
@@ -58,23 +59,13 @@ export class PetsService {
     }
   }
 
-  async findAll() {
-    const petsWithPhotos = await this.petRepository.find({
-      relations: ['photos'],
-    });
-
-    // const petsWithFiles = await Promise.all(
-    //   petsWithPhotos.map(async (pet) => {
-    //     const photosWithFiles = await Promise.all(
-    //       pet.photos.map(async (photo) => {
-    //         const file = await this.readFile(photo.path);
-    //         return { ...photo, file };
-    //       }),
-    //     );
-
-    //     return { ...pet, photos: photosWithFiles };
-    //   }),
-    // );
+  async findAll(id: string): Promise<Pet[]> {
+    const petsWithPhotos = await this.petRepository
+      .createQueryBuilder('pet')
+      .leftJoinAndSelect('pet.photos', 'photo')
+      .innerJoinAndSelect('pet.user', 'user')
+      .where('user.id != :id', { id })
+      .getMany();
 
     return petsWithPhotos;
   }
