@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TextInput, Image, TouchableWithoutFeedback } from "react-native";
+import { View, Text, TextInput, Image, TouchableWithoutFeedback, Keyboard } from "react-native";
 import styles from "./createpet_styles";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import store from "../../../../redux/store";
@@ -10,13 +10,14 @@ export default function CreatePet(props: any) {
     // imagen
     const [images, setImages] = React.useState<string[]>([]);
     // formulario
-    const [name, setName] = React.useState(props.pet ? props.pet.name : '');
-    const [gender, setGender] = React.useState('');
-    const [breed, setBreed] = React.useState('');
-    const [weight, setWeight] = React.useState('');
-    const [age, setAge] = React.useState('');
-    const [location, setLocation] = React.useState('');
-    const [description, setDescription] = React.useState(props.pet ? props.pet.description : '');
+    const [name, setName] = React.useState<string>(props.pet ? props.pet.name : '');
+    const [gender, setGender] = React.useState<string>('');
+    const [breed, setBreed] = React.useState<string>('');
+    const [weight, setWeight] = React.useState<string>('');
+    const [age, setAge] = React.useState<string>('');
+    const [location, setLocation] = React.useState<string>('');
+    const [description, setDescription] = React.useState<string>(props.pet ? props.pet.description : '');
+    const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
     React.useEffect(() => {
         if (props.images) {
@@ -68,6 +69,7 @@ export default function CreatePet(props: any) {
     }
 
     const handleSubmit = async () => {
+        setIsLoading(true)
         const token = await AsyncStorage.getItem('token');
         const user = await AsyncStorage.getItem('user')
         const userId = JSON.parse(user).id
@@ -80,17 +82,21 @@ export default function CreatePet(props: any) {
             updatePet(token, userId, array)
             .then(() => {
                 setName('')
+                alert('Mascota actualizada correctamente')
+                setIsLoading(false)
             })
         } else {
             createPet(token, userId, array).then(() => {
                 setName('')
+                alert('Mascota creada correctamente')
+                setIsLoading(false)
             })
         }
         
     }
 
     async function createPet(token, userId, array) {
-        return await fetch(store.getState().url + '/pets', {
+        return await fetch(store.getState().url + '/pets/' + userId, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -139,6 +145,12 @@ export default function CreatePet(props: any) {
         newImages.pop()
         setImages([...newImages])
     }
+
+    if(isLoading) {
+        return <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}> 
+            <Text>Guardando...</Text>
+        </View>
+    }
     return (
         <>
             <View style={styles.container}>
@@ -169,7 +181,7 @@ export default function CreatePet(props: any) {
                     }} />
                     <TextInput style={styles.inputDescripcion} onChange={(e) => {
                         setDescription(e.nativeEvent.text)
-                    }} multiline={true}
+                    }}
                         numberOfLines={3}
                         placeholder={props.pet ? props.pet.description : 'Descripción (Como es tu perro, edad, género...'} />
                     {/* <TextInput style={styles.input} placeholder="Género (M o F)" value={gender} onChange={(e) => {

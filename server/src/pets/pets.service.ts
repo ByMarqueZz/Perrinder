@@ -8,6 +8,7 @@ import { Photo } from 'src/photos/entities/photo.entity';
 import * as fs from 'fs';
 import * as path from 'path';
 import { User } from 'src/users/entities/user.entity';
+import { Like } from 'src/likes/entities/like.entity';
 
 @Injectable()
 export class PetsService {
@@ -15,9 +16,15 @@ export class PetsService {
     @InjectRepository(Pet) private petRepository: Repository<Pet>,
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Photo) private photoRepository: Repository<Photo>,
+    @InjectRepository(Like) private likeRepository: Repository<Like>,
   ) { }
 
-  async create(createPetDto: CreatePetDto) {
+  async create(createPetDto: CreatePetDto, userId: User['id']) {
+    // comprobamos que el usuario no tenga ya un pet
+    const user = await this.userRepository.findOne({ where: { id: userId }, relations: ['pets'] });
+    if (user.pets.length > 0) {
+      throw new HttpException('User already has a pet', HttpStatus.BAD_REQUEST);
+    }
     // separamos las fotos del resto de los datos
     const { photos, ...rest } = createPetDto;
     // creamos el pet con los datos restantes
@@ -36,29 +43,13 @@ export class PetsService {
     return newPet;
   }
 
-  async savePhotos(photoUrl: string, id: number): Promise<string> {
-    // Eliminar el prefijo "file://" de la URL
-    const filePath = photoUrl.replace('file://', '');
-
-    try {
-      // Leer el archivo desde la ruta local
-      const photoData = fs.readFileSync(filePath);
-
-      const res = await fetch('https://api.imgbb.com/1/upload', {
-        method: 'POST',
-        body: JSON.stringify({
-          key: 'f0a62074f96665b245a56bbd67a78c6e',
-          image: photoData.toString('base64'),
-        }),
-      })
-      const data = await res.json();
-      return data.data.url;
-    } catch (error) {
-      console.error('Error al guardar la foto:', error);
-      throw error;
-    }
-  }
-
+  /**
+   * Filtramos los pets para que no salgan:
+   * los que ya le ha dado like o dislike o
+   * su propio pet
+   * @param id userId que consulta ver pets
+   * @returns Pet[] pets para mostrar en la app
+   */
   async findAll(id: string): Promise<Pet[]> {
     const petsWithPhotos = await this.petRepository
       .createQueryBuilder('pet')
@@ -66,18 +57,16 @@ export class PetsService {
       .innerJoinAndSelect('pet.user', 'user')
       .where('user.id != :id', { id })
       .getMany();
-
-    return petsWithPhotos;
+    
+    // filtramos los pets que ya le ha dado like o dislike
+    const likes = await this.likeRepository.find({ where: { user1Id: +id } });
+    const petsFull = petsWithPhotos.filter(pet => {
+      return !likes.some(like => like.user2Id === pet.user.id);
+    })
+  
+    return petsFull;
   }
-
-  async readFile(photoPath: string) {
-    const allPath = path.join(__dirname, '..', '..', 'uploads', photoPath);
-    const data = fs.readFileSync(allPath, { encoding: 'base64' });
-    const type = data.endsWith('/9j/') ? 'image/jpeg' : 'image/png';
-    const blob = Buffer.from(data, 'base64'); // Using Buffer.from() instead of Blob
-
-    return { data: blob, type };
-  }
+  
 
   findOne(id: number) {
     const exists = this.petRepository.findOne({ where: { id } });

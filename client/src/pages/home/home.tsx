@@ -4,6 +4,7 @@ import styles from './home_styles';
 import store from '../../redux/store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
+import ConfettiCannon from 'react-native-confetti-cannon';
 
 export default function Home(props: any) {
     const [pets, setPets] = useState<any>([]);
@@ -16,6 +17,8 @@ export default function Home(props: any) {
     const [isLoaded, setIsLoaded] = useState(false);
     const [panResponder, setPanResponder] = useState(null);
     const [likeTextPosition, setLikeTextPosition] = useState({ x: 0, y: 0 });
+    const [isMatch, setIsMatch] = useState(false);
+    const [petMatched, setPetMatched] = useState(null);
 
     const rotateCard = position.x.interpolate({
         inputRange: [-SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2],
@@ -41,9 +44,6 @@ export default function Home(props: any) {
 
     useEffect(() => {
         getPets()
-            .then(() => {
-                console.table([{ pets: pets, imagePets: imagePets, image: imagePets[0].images[indicePet] }])
-            })
             .finally(() => {
                 setIsLoaded(true);
             });
@@ -89,11 +89,63 @@ export default function Home(props: any) {
         if (data.length !== 0 && petsWithImages.length !== 0) {
             setPets(data)
             setImagePets(petsWithImages);
-        } else {
-            alert('No hay más mascotas para mostrar')
         }
 
     }
+
+    async function likePet(pet) {
+        const token = await AsyncStorage.getItem('token');
+        const user = await AsyncStorage.getItem('user');
+        const userParsed = user ? JSON.parse(user) : null;
+        if (!userParsed) {
+            alert('Ha ocurrido un error, por favor, vuelve a iniciar sesión');
+            return;
+        }
+        const response = await fetch(store.getState().url + '/likes', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({
+                user1Id: userParsed.id,
+                user2Id: pet.user.id
+            })
+        })
+        const data = await response.json();
+        if (data.haslike) {
+            setPetMatched(pet);
+            setIsMatch(true);
+            setTimeout(() => {
+                setIsMatch(false);
+                setPetMatched(null);
+            }, 4500);
+        }
+    }
+
+    async function dislikePet(petId: number) {
+        const token = await AsyncStorage.getItem('token');
+        const user = await AsyncStorage.getItem('user');
+        const userParsed = user ? JSON.parse(user) : null;
+        if (!userParsed) {
+            alert('Ha ocurrido un error, por favor, vuelve a iniciar sesión');
+            return;
+        }
+        const response = await fetch(store.getState().url + '/dislike', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({
+                user1Id: userParsed.id,
+                user2Id: petId
+            })
+        })
+        const data = await response.json();
+        console.log(data)
+    }
+
     function createPanResponder() {
         return PanResponder.create({
             onStartShouldSetPanResponder: (event, gesture) => {
@@ -117,7 +169,8 @@ export default function Home(props: any) {
                     Animated.spring(position, {
                         toValue: { x: SCREEN_WIDTH + 100, y: gesture.dy },
                         useNativeDriver: false,
-                    }).start(() => {
+                    }).start(async () => {
+                        await likePet(pets[0]);
                         nextCard();
                     });
                 } else if (gesture.dx < -120) {
@@ -125,7 +178,8 @@ export default function Home(props: any) {
                     Animated.spring(position, {
                         toValue: { x: -SCREEN_WIDTH - 100, y: gesture.dy },
                         useNativeDriver: false,
-                    }).start(() => {
+                    }).start(async () => {
+                        await dislikePet(pets[0].user.id);
                         nextCard();
                     });
                 } else {
@@ -170,6 +224,22 @@ export default function Home(props: any) {
         );
     }
 
+    if (isMatch) {
+        return (
+            <View style={styles.match}>
+                <ConfettiCannon
+                    count={150} // Número de piezas de confeti
+                    origin={{ x: -10, y: 0 }} // Origen del confeti (parte superior izquierda)
+                    autoStart={true}
+                    fadeOut={true}
+                    explosionSpeed={300} // Velocidad de la explosión
+                />
+                <Text style={styles.textMatch}>¡Match!</Text>
+                <Image style={styles.matchImage} source={{ uri: imagePets[indice].images[indicePet] }} />
+                <Text>¡Enhorabuena!, acabas de hacer match con {petMatched.name}</Text>
+            </View>
+        );
+    }
 
     if (pets.length === 0) {
         return (
@@ -180,6 +250,7 @@ export default function Home(props: any) {
             </View>
         );
     }
+
     return (
         <View style={styles.container}>
             {pets.map((pet, index) => {

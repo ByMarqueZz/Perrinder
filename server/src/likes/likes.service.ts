@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateLikeDto } from './dto/create-like.dto';
 import { UpdateLikeDto } from './dto/update-like.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -7,10 +7,18 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class LikesService {
-  constructor(@InjectRepository(Like) private likerepository: Repository<Like>) {}
-  create(createLikeDto: CreateLikeDto) {
-    const like = this.likerepository.create(createLikeDto);
-    return this.likerepository.save(like);
+  constructor(
+    @InjectRepository(Like) private likerepository: Repository<Like>,
+  ) {}
+  async create(createLikeDto: CreateLikeDto) {
+    const like = await this.likerepository.create(createLikeDto);
+    const saveLike = await this.likerepository.save(like);
+    const haslike = await this.likerepository.find({where: {user1Id: createLikeDto.user2Id, user2Id: createLikeDto.user1Id}});
+    if(haslike.length === 0) {
+      return saveLike;
+    } else {
+      return {saveLike, haslike};
+    }
   }
 
   findAll() {

@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { PetsModule } from './pets/pets.module';
 import { PhotosModule } from './photos/photos.module';
 import { LikesModule } from './likes/likes.module';
+import { DislikeModule } from './dislike/dislike.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { LikesModule } from './likes/likes.module';
     PetsModule,
     PhotosModule,
     LikesModule,
+    DislikeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

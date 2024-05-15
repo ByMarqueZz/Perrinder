@@ -22,14 +22,14 @@ import { ApiTags } from '@nestjs/swagger';
 export class PetsController {
   constructor(private readonly petsService: PetsService) {}
 
-  @Post()
+  @Post(':userId')
   @ApiBody({ type: CreatePetDto })
   @ApiResponse({
     status: 201,
     description: 'The pet has been successfully created.',
   })
-  create(@Body() createPetDto: CreatePetDto) {
-    return this.petsService.create(createPetDto);
+  create(@Param('userId') userId: string, @Body() createPetDto: CreatePetDto) {
+    return this.petsService.create(createPetDto, +userId);
   }
 
   @Get(':user')

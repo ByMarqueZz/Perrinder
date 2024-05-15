@@ -6,6 +6,26 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
+    match: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 20,
+        padding: 20, 
+        backgroundColor: 'white',
+    },
+    textMatch: {
+        fontSize: 38,
+        fontWeight: 'bold',
+        color: '#f96247'
+    },
+    matchImage: {
+        width: 200,
+        height: 200,
+        borderRadius: 100,
+    },
     card: {
         borderRadius: 10,
         borderWidth: 2,
