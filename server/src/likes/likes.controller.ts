@@ -23,10 +23,10 @@ export class LikesController {
     return this.likesService.create(createLikeDto);
   }
 
-  @Get()
+  @Get('/all/:id')
   @ApiResponse({ status: 200, description: 'Returns all likes.' })
-  findAll() {
-    return this.likesService.findAll();
+  findAll(@Param('id') id: string) {
+    return this.likesService.findAll(+id);
   }
 
   @Get(':id')
