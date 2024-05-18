@@ -65,7 +65,7 @@ export default function Profile(props: any) {
     }
 
     if(!isLoaded) {
-        return <Text>Loading...</Text>
+        return <View style={styles.container}></View>
     }
 
     return (

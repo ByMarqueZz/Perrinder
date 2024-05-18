@@ -4,6 +4,7 @@ import { Provider } from 'react-redux';
 import store from './src/redux/store';
 import AppNavigation from './src/routes/AppRoutes';
 import { initializeApp } from 'firebase/app';
+import { StatusBar } from 'expo-status-bar';
 
 export default function App() {
     React.useEffect(() => {
@@ -20,6 +21,7 @@ export default function App() {
     }, []);
     return (
         <Provider store={store}>
+            <StatusBar backgroundColor='transparent' />
             <AppNavigation />
         </Provider>
     );

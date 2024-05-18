@@ -34,7 +34,7 @@ export function Register(props: any) {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            mail: email,
+                            email: email,
                             password: password
                         })
                     }).then((res) => {
@@ -48,6 +48,7 @@ export function Register(props: any) {
                         }
                     })
                 } else {
+                    console.log(res.status)
                     alert('Algo salió mal :(')
                 }
             })

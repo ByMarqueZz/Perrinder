@@ -6,7 +6,7 @@ import store from "../../redux/store";
 import { Like, LikesResponse } from "../../interfaces/interfaces";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
 
-export default function Match(props: any) {
+export default function Match() {
     const [mislikesWithImages, setMislikesWithImages] = React.useState<Like[]>([]);
     const [loslikequemedanWithImages, setLoslikequemedanWithImages] = React.useState<Like[]>([]);
     const [showMislikes, setShowMislikes] = React.useState<boolean>(true);

@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
     },
     name: {
         position: 'absolute',
-        bottom: 50,
+        bottom: 70,
         left: 20,
         fontSize: 32,
         fontWeight: 'bold',
@@ -76,6 +76,7 @@ const styles = StyleSheet.create({
         textShadowColor: 'black',
         textShadowOffset: { width: 2, height: 2 },
         textShadowRadius: 2,
+        width: '80%',
     },
     likeTextView: {
         position: 'absolute',
