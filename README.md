@@ -51,7 +51,7 @@ El servidor se ha desarrollado con Node y NestJS. La estructura de carpetas es l
 Contamos con una carpeta para cada tabla de nuestra base de datos y dentro de ella contamos con entity, create_dto, update_dto, controller, module y service. Controlando tanto los datos de la entidad y el gestión de base de datos como los END POINTS y la lógica de negocio. Para la seguridad de la aplicación backend he implementado JWT. Es un sistema de autenticación que se basa en la generación de un token que se envía al cliente y este lo envía en cada petición para comprobar que está autenticado y así evitar que cualquier persona pueda acceder a los datos de la aplicación. Para permitir que el cliente pueda acceder a los datos de la aplicación he implementado CORS. Es un sistema que permite que un cliente pueda acceder a los datos de un servidor que no está en el mismo dominio y a parte se utiliza la tecnología de WebSockets para el chat de la aplicación.
 
 ### Base de datos
-A continuación se muestra el diagrama de la base de datos. Aún le quedan cosas como los matchs y demás que iré actualizando
+A continuación se muestra el diagrama de la base de datos.
 <br><br>
 <img src="https://github.com/ByMarqueZz/Perrinder/blob/master/client/assets/readme/database.png" alt="Diagrama de la base de datos">
 <br><br>
