@@ -120,9 +120,12 @@ export default function Match() {
                             <View key={index} style={styles.cardlist}>
                                 {like.user.pets.map((pet) => (
                                     <View style={styles.card} key={pet.id}>
-                                        <Image source={{ uri: pet.photoUrls[0] }} style={styles.image} blurRadius={isMatch(like.user.id) ? 0 : 30}/>
+                                        <Image source={{ uri: pet.photoUrls[0] }} style={styles.image} blurRadius={isMatch(like.user.id) ? 0 : 30} />
                                         {isMatch(like.user.id) && (
-                                            <Image source={require('../../../assets/footer/match_focus.png')} style={styles.heart} />
+                                            <>
+                                                <Image source={require('../../../assets/footer/match_focus.png')} style={styles.heart} />
+                                                <Text style={styles.namePet}>{pet.name}</Text>
+                                            </>
                                         )}
                                     </View>
                                 ))}

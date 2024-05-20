@@ -117,11 +117,29 @@ export default function Home(props: any) {
         if (data.haslike) {
             setPetMatched(pet);
             setIsMatch(true);
+            await createRoom(userParsed.id, pet.user.id);
             setTimeout(() => {
                 setIsMatch(false);
                 setPetMatched(null);
             }, 4500);
         }
+    }
+
+    async function createRoom(user1Id: number, user2Id: number) {
+        const token = await AsyncStorage.getItem('token');
+        const response = await fetch(store.getState().url + '/chat/room', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({
+                user1Id: user1Id,
+                user2Id: user2Id
+            })
+        });
+        const data = await response.json();
+        console.log(data);
     }
 
     async function dislikePet(petId: number) {

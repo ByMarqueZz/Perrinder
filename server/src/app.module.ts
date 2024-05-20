@@ -8,6 +8,7 @@ import { PetsModule } from './pets/pets.module';
 import { PhotosModule } from './photos/photos.module';
 import { LikesModule } from './likes/likes.module';
 import { DislikeModule } from './dislike/dislike.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { DislikeModule } from './dislike/dislike.module';
     PhotosModule,
     LikesModule,
     DislikeModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],

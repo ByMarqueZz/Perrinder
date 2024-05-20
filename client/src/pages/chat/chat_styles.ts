@@ -5,8 +5,16 @@ export default StyleSheet.create({
         flex: 1,
         backgroundColor: '#f1f1f1',
         width: '100%',
-        height: '100%',
         alignItems: 'center',
         justifyContent: 'center',
     },
+    flatList: {
+        width: '100%',
+        marginBottom: 10,
+        marginTop: 50,
+        display: 'flex',
+        flexDirection: 'column-reverse',
+        paddingLeft: 30,
+        paddingRight: 30,
+    }
 });
