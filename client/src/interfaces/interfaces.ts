@@ -41,3 +41,19 @@ export interface LikesResponse {
     mislikes: Like[];
     losqlikequemedan: Like[];
 }
+
+export interface ChatRoom {
+    id: number;
+    user1: User;
+    user2: User;
+    messages: Message[];
+    createdAt: string;
+}
+
+export interface Message {
+    id: number;
+    content: string;
+    sender: User;
+    chatRoom: ChatRoom;
+    createdAt: string;
+}

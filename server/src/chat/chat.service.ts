@@ -24,7 +24,7 @@ export class ChatService {
   }
 
   async getChatRoom(id: number): Promise<ChatRoom> {
-    return this.chatRoomRepository.findOne({ where: { id }, relations: ['messages'] });
+    return this.chatRoomRepository.findOne({ where: { id }, relations: ['messages', 'messages.sender'] });
   }
 
   async getUserChatRooms(userId: number): Promise<ChatRoom[]> {
@@ -33,7 +33,7 @@ export class ChatService {
         { user1: { id: userId } },
         { user2: { id: userId } }
       ],
-      relations: ['user1', 'user2', 'messages'],
+      relations: ['user1', 'user2', 'messages', 'user1.pets', 'user2.pets', 'user1.pets.photos', 'user2.pets.photos'],
     });
   }
 
@@ -43,6 +43,7 @@ export class ChatService {
   }
 
   async getMessages(chatRoom: ChatRoom): Promise<Message[]> {
-    return this.messageRepository.find({ where: { chatRoom }, relations: ['sender'] });
+    const messages = await this.messageRepository.find({ where: { chatRoom }, relations: ['sender'] });
+    return messages;
   }
 }

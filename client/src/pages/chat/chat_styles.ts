@@ -16,5 +16,15 @@ export default StyleSheet.create({
         flexDirection: 'column-reverse',
         paddingLeft: 30,
         paddingRight: 30,
+    },
+    goBack: {
+        position: 'absolute',
+        top: 50,
+        left: 30,
+        zIndex: 1,
+    },
+    goBackText: {
+        fontSize: 16,
+        color: 'blue'
     }
 });

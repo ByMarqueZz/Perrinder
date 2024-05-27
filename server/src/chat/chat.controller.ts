@@ -20,7 +20,7 @@ export class ChatController {
   @Get('room/:id/messages')
   async getMessages(@Param('id') id: number) {
     const chatRoom = await this.chatService.getChatRoom(id);
-    return this.chatService.getMessages(chatRoom);
+    return chatRoom.messages;
   }
 
   @Get('rooms/:userId')

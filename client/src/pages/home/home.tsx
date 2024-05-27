@@ -31,6 +31,7 @@ export default function Home(props: any) {
         setLikeTextPosition({ x: 0, y: 0 });
         // elimina el primer elemento del array
         setPets(prevPets => prevPets.slice(1));
+        setImagePets(prevImagePets => prevImagePets.slice(1));
     };
 
     useEffect(() => {

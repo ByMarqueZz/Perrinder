@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, FlatList } from 'react-native';
+import { View, Text, TextInput, Button, FlatList, TouchableOpacity } from 'react-native';
 import io from 'socket.io-client';
 import store from '../../redux/store';
 import styles from './chat_styles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ChatRoom, Message, User } from '../../interfaces/interfaces';
 
-const Chat = () => {
+const Chat = ({room, goBack}: {room: ChatRoom, goBack: () => void}) => {
     const [message, setMessage] = useState<string>('');
-    const [messages, setMessages] = useState<any[]>([]);
+    const [messages, setMessages] = useState<Message[]>([]);
     const socket = io(store.getState().url);
-    const [userId, setUserId] = useState<string>('');
-    const [roomId, setRoomId] = useState<string>('');
+    const [user, setUser] = useState<User | null>(null);
 
     useEffect(() => {
-        if (roomId == '' || roomId == null) return;
-        socket.emit('joinRoom', { roomId });
+        if (room.id == null) return;
+        socket.emit('joinRoom', room.id );
 
         socket.on('message', (msg) => {
             setMessages((prevMessages) => [...prevMessages, msg]);
@@ -23,7 +23,7 @@ const Chat = () => {
         return () => {
             socket.off('message');
         };
-    }, [roomId]);
+    }, [room]);
 
     useEffect(() => {
         const fetchUserId = async () => {
@@ -33,12 +33,11 @@ const Chat = () => {
                 alert('Ha ocurrido un error, por favor, vuelve a iniciar sesión');
                 return;
             }
-            setUserId(userParsed.id);
-            return userParsed.id;
+            setUser(userParsed);
         };
-        const fetchRoomId = async (userId: number) => {
+        const fetchMessages = async () => {
             const token = await AsyncStorage.getItem('token');
-            const response = await fetch(`${store.getState().url}/chat/rooms/${userId}`, {
+            const response = await fetch(`${store.getState().url}/chat/room/${room.id}/messages`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -47,30 +46,33 @@ const Chat = () => {
             });
             if (response.status === 200) {
                 const data = await response.json();
-                setRoomId(data.id);
+                setMessages(data);
             } else {
-                console.log({status: response.status, response});
                 alert('Ha ocurrido un error, por favor, vuelve a iniciar sesión');
             }
         };
-        fetchUserId().then((userId: number) => {
-            fetchRoomId(userId);
-        });
+        fetchUserId();
+        fetchMessages();
     }, []);
 
     const sendMessage = () => {
-        socket.emit('message', { roomId, message, senderId: userId });
+        socket.emit('message', { roomId: room.id, message, senderId: user.id });
         setMessage('');
     };
 
     return (
         <View style={styles.container}>
+            <TouchableOpacity style={styles.goBack} onPress={() => {
+                    goBack()
+                }}>
+                <Text style={styles.goBackText}>Ir atrás</Text>
+            </TouchableOpacity>
             <FlatList
                 style={styles.flatList}
                 data={messages}
                 renderItem={({ item }) => (
                     <View>
-                        <Text>{item.sender.name}: {item.content}</Text>
+                        <Text>{item.sender.firstName}: {item.content}</Text>
                     </View>
                 )}
                 keyExtractor={(item, index) => index.toString()}

@@ -7,11 +7,11 @@ import Home from '../pages/home/home';
 import Chat from '../pages/chat/chat';
 import Login from '../pages/login/components/login/login';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import Profile from '../pages/profile/profile';
 import Match from '../pages/match/match';
 import Home_login from '../pages/login/home_login';
 import { Register } from '../pages/login/components/register/resgiter';
+import Rooms from '../pages/chat/rooms';
 
 const Tab = createBottomTabNavigator<any>();
 const Slack = createStackNavigator<any>();
@@ -94,7 +94,7 @@ export default function AppNavigation() {
                     {(props) => <Match {...props} loadUserFromStorage={loadUserFromStorage} />}
                 </Tab.Screen>
                 <Tab.Screen name="sms">
-                    {(props) => <Chat {...props} loadUserFromStorage={loadUserFromStorage} />}
+                    {(props) => <Rooms {...props} loadUserFromStorage={loadUserFromStorage} />}
                 </Tab.Screen>
                 <Tab.Screen name="profile">
                     {(props) => <Profile {...props} loadUserFromStorage={loadUserFromStorage} />}
