@@ -1,9 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import * as fs from 'fs';
+import * as path from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const httpsOptions = {
+    key: fs.readFileSync(path.resolve(__dirname, '/etc/letsencrypt/live/webview.granada.ai/privkey.pem')),
+    cert: fs.readFileSync(path.resolve(__dirname, '/etc/letsencrypt/live/webview.granada.ai/fullchain.pem')),
+  };
+  const app = await NestFactory.create(AppModule, { httpsOptions });
 
   const config = new DocumentBuilder()
     .addBearerAuth()
