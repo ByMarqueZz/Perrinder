@@ -11,8 +11,8 @@ export function Register(props: any) {
     const [email, setEmail] = React.useState<string>('')
     const [password, setPassword] = React.useState<string>('')
 
-    const handleRegister = () => {
-        fetch(store.getState().url + '/users', {
+    const handleRegister = async () => {
+        await fetch(store.getState().url + '/users', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -25,33 +25,22 @@ export function Register(props: any) {
                 password: password
             })
         })
-            .then((res) => {
-                if (res.status === 201) {
-                    // Login
-                    fetch(store.getState().url + '/auth/login', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            email: email,
-                            password: password
-                        })
-                    }).then((res) => {
-                        if (res.status === 201) {
-                            res.json().then((data) => {
-                                AsyncStorage.setItem('token', data.token);
-                                AsyncStorage.setItem('user', JSON.stringify(data.user));
-                                // AQUI DEBERÍA DE SALIR UN MODAL DE BIENVENIDA
-                                props.loadUserFromStorage();
-                            })
-                        }
-                    })
-                } else {
-                    console.log(res.status)
-                    alert('Algo salió mal :(')
-                }
+        // Login
+        const res = await fetch(store.getState().url + '/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password
             })
+        })
+        const data = await res.json()
+        AsyncStorage.setItem('token', data.token);
+        AsyncStorage.setItem('user', JSON.stringify(data.user));
+        // AQUI DEBERÍA DE SALIR UN MODAL DE BIENVENIDA
+        props.loadUserFromStorage();
     }
     return (
         <View style={styles.container}>
@@ -70,11 +59,10 @@ export function Register(props: any) {
                     <TextInput onChange={(e) => {
                         setPhone(e.nativeEvent.text)
                     }
-                    } style={styles.input} placeholder="Teléfono" />
-                    <TextInput onChange={(e) => {
-                        setEmail(e.nativeEvent.text)
-                    }
-                    } style={styles.input} placeholder="Correo" />
+                    } style={styles.input} placeholder="Teléfono" keyboardType="numeric"/>
+                    <TextInput style={styles.input} placeholder="Correo" onChange={(e) => {
+                        setEmail(e.nativeEvent.text.toLowerCase())
+                    }} autoCapitalize='none'/>
                     <TextInput
                         secureTextEntry={true}
                         onChange={(e) => {

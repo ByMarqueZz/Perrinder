@@ -30,7 +30,7 @@ export class AuthService {
       password: plainToHash,
     });
 
-    this.authRepository.save(newUser);
+    await this.authRepository.save(newUser);
   }
 
   async login(createAuthDto: CreateAuthDto) {
@@ -39,8 +39,15 @@ export class AuthService {
       where: { email },
     });
 
+    // Si nunca se ha logeado antes, se crea el auth
     if (!userFound) {
-      await this.create(createAuthDto);
+      const plainToHash = await hash(password, 10);
+      const newUser = this.authRepository.create({
+        email,
+        password: plainToHash,
+      });
+      await this.authRepository.save(newUser);
+      // Se busca el usuario creado para hacer el login
       userFound = await this.authRepository.findOne({
         where: { email },
       });
