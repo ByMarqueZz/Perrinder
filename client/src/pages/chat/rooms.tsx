@@ -75,7 +75,7 @@ export default function Rooms({loadUserFromStorage}: {loadUserFromStorage: () =>
     )
 
     if(rooms.length === 0) return (
-        <View style={styles.container}>
+        <View style={styles.container2}>
             <Text style={styles.text}>Parece que aún no has hecho ningún match 😢</Text>
             <Image source={require('../../../assets/lloro.png')} style={{width: 200, height: 200}} />
         </View>
@@ -103,6 +103,12 @@ const styles = StyleSheet.create({
         flex: 1,
         marginTop: 70,
         alignItems: 'center',
+    },
+    container2: {
+        flex: 1,
+        marginTop: 70,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     title: {
         fontSize: 30,

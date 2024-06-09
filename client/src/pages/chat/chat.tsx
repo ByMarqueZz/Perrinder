@@ -71,8 +71,12 @@ const Chat = ({room, goBack}: {room: ChatRoom, goBack: () => void}) => {
                 style={styles.flatList}
                 data={messages}
                 renderItem={({ item }) => (
-                    <View>
-                        <Text>{item.sender.firstName}: {item.content}</Text>
+                    <View style={styles.message}>
+                        {
+                            item.sender.id === user.id ? 
+                            <Text style={styles.myMessage}>{item.content}</Text>:
+                            <Text style={styles.theirMessage}>{item.content}</Text>
+                        }
                     </View>
                 )}
                 keyExtractor={(item, index) => index.toString()}

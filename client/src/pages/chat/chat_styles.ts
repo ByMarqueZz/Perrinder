@@ -26,5 +26,24 @@ export default StyleSheet.create({
     goBackText: {
         fontSize: 16,
         color: 'blue'
-    }
+    },
+    message: {
+        borderRadius: 20,
+    },
+    myMessage: {
+        backgroundColor: 'lightblue',
+        padding: 10,
+        borderRadius: 30,
+        marginBottom: 10,
+        width: '60%',
+        alignSelf: 'flex-end',
+    },
+    theirMessage: {
+        backgroundColor: 'lightgreen',
+        padding: 10,
+        borderRadius: 10,
+        marginBottom: 10,
+        width: '60%',
+        alignSelf: 'flex-start',
+    },
 });
