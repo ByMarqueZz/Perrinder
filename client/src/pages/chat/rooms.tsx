@@ -77,6 +77,11 @@ export default function Rooms({loadUserFromStorage}: {loadUserFromStorage: () =>
     if(rooms.length === 0) return (
         <View style={styles.container2}>
             <Text style={styles.text}>Parece que aún no has hecho ningún match 😢</Text>
+            <Text onPress={async () => {
+                            await fetchRooms();
+                        }} style={{
+                            color: 'blue'
+                        }}>Recargar</Text>
             <Image source={require('../../../assets/lloro.png')} style={{width: 200, height: 200}} />
         </View>
     );

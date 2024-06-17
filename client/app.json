@@ -37,7 +37,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/perricon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.marquez.perrinder.android",
@@ -51,7 +51,7 @@
       ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/perricon.png"
     },
     "extra": {
       "eas": {

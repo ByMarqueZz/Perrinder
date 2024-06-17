@@ -29,7 +29,7 @@ export default function CreatePet(props: any) {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.All,
             allowsEditing: true,
-            aspect: [4, 3],
+            aspect: [9, 16],
             quality: 1,
         });
 
@@ -38,6 +38,8 @@ export default function CreatePet(props: any) {
             setImages([...images, result.assets[0].uri]);
         }
     };
+    // Gentil gigante. Disfruto de la compañía tranquila y las caminatas relajadas. Busco un compañero que
+    // aprecie la tranquilidad y las conversaciones silenciosas.
 
     async function urlToBlob(uri) {
         return new Promise((resolve, reject) => {

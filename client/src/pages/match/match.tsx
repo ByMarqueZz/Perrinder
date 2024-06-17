@@ -99,6 +99,11 @@ export default function Match({loadUserFromStorage}: {loadUserFromStorage: () =>
                 showMislikes ? (
                     <View style={styles.mislikescontainer}>
                         {mislikesWithImages.length === 0 ? <View style={styles.noLike}><Text>No has dado ningún like todavía</Text></View> : null}
+                        <Text onPress={async () => {
+                            await fetchData();
+                        }} style={{
+                            color: 'blue'
+                        }}>Recargar</Text>
                         {mislikesWithImages.map((like, index) => (
                             <View key={index} style={styles.cardlist}>
                                 {like.user.pets.map((pet) => (
@@ -116,6 +121,11 @@ export default function Match({loadUserFromStorage}: {loadUserFromStorage: () =>
                 ) : (
                     <View style={styles.loslikequemedancontainer}>
                         {loslikequemedanWithImages.length === 0 ? <View style={styles.noLike}><Text>No has recibido ningún like todavía</Text></View> : null}
+                        <Text onPress={async () => {
+                            await fetchData();
+                        }} style={{
+                            color: 'blue'
+                        }}>Recargar</Text>
                         {loslikequemedanWithImages.map((like, index) => (
                             <View key={index} style={styles.cardlist}>
                                 {like.user.pets.map((pet) => (

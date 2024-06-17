@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
     },
     name: {
         position: 'absolute',
-        bottom: 70,
+        bottom: 140,
         left: 20,
         fontSize: 32,
         fontWeight: 'bold',

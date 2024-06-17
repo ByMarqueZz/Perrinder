@@ -122,8 +122,12 @@ export default function Home(props: any) {
             setTimeout(() => {
                 setIsMatch(false);
                 setPetMatched(null);
+                nextCard();
             }, 4500);
+        } else {
+            nextCard();
         }
+        
     }
 
     async function createRoom(user1Id: number, user2Id: number) {
@@ -164,6 +168,7 @@ export default function Home(props: any) {
         })
         const data = await response.json();
         console.log(data)
+        nextCard();
     }
 
     function createPanResponder() {
@@ -191,7 +196,6 @@ export default function Home(props: any) {
                         useNativeDriver: false,
                     }).start(async () => {
                         await likePet(pets[0]);
-                        nextCard();
                     });
                 } else if (gesture.dx < -120) {
                     // Swipe left and dislike
@@ -200,7 +204,6 @@ export default function Home(props: any) {
                         useNativeDriver: false,
                     }).start(async () => {
                         await dislikePet(pets[0].user.id);
-                        nextCard();
                     });
                 } else {
                     // Return to initial position
@@ -266,6 +269,11 @@ export default function Home(props: any) {
                 <Image source={require('../../../assets/nodog.png')} />
                 <Text>¡Vaya...!</Text>
                 <Text>Parece que ya has visto todas las mascotas</Text>
+                <Text onPress={async () => {
+                    setIsLoaded(false);
+                    await getPets();
+                    setIsLoaded(true);
+                }} style={{ color: 'blue' }}>Volver a cargar</Text>
             </View>
         );
     }

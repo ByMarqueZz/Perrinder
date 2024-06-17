@@ -13,6 +13,7 @@ const Chat = ({room, goBack}: {room: ChatRoom, goBack: () => void}) => {
     const [user, setUser] = useState<User | null>(null);
 
     useEffect(() => {
+        console.log(room.id)
         if (room.id == null) return;
         socket.emit('joinRoom', room.id );
 
